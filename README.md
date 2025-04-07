@@ -1,3 +1,5 @@
+from json.decoder import JSONObject
+
 # Report Portal Launcher
 
 ## Overview
@@ -16,19 +18,23 @@ pip install reportportal-client
 
 ### 1. Initializing ReportPortalLauncher
 
+# Configuration for Report Portal client
+
+Create a configuration file at the path `~\.report_portal\config.json` with the following parameters:
+
+```
+{
+    "endpoint": "https://your-report-portal.com",
+    "api_key": "your_api_key"
+}
+```
+
 To start using the Report Portal client, initialize the `ReportPortalLauncher` with the required configuration:
 
 ```python
 from report_portal_launcher import ReportPortalLauncher
 
-# Configuration for Report Portal client
-config = {
-    "endpoint": "https://your-report-portal.com",
-    "project": "your_project_name",
-    "api_key": "your_api_key"
-}
-
-launcher = ReportPortalLauncher(config)
+launcher = ReportPortalLauncher(project_name="your_project_name")
 ```
 
 ### 2. Starting a Test Launch
