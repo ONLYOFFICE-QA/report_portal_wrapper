@@ -1,0 +1,9 @@
+[project]
+name = "report-portal-wrapper"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "reportportal-client>=5.6.4",
+]
