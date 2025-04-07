@@ -9,7 +9,11 @@ class ReportPortalLauncher:
     Allows creating a new launch, connecting to an existing launch,
     finishing it, and sending logs.
     """
-    def __init__(self, project_name: str = None, config_path: str = "./config.json"):
+    def __init__(
+            self,
+            project_name: str = None,
+            config_path: str = os.path.join(os.path.expanduser('~'), ".report_portal", "config.json")
+    ):
         """
         Initializes ReportPortalLauncher with the provided configuration for RPClient.
 
