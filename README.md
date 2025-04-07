@@ -100,12 +100,8 @@ launcher.finish_launch()
 from report_portal_launcher import ReportPortalLauncher, ReportPortalTest
 
 # Initialize the launcher
-config = {
-    "endpoint": "https://your-report-portal.com/api/v1",
-    "project": "your_project_name",
-    "api_key": "your_api_key"
-}
-launcher = ReportPortalLauncher(config)
+
+launcher = ReportPortalLauncher(project_name="your_project_name")
 
 # Start a test launch
 launcher.start_launch(name="My Test")
