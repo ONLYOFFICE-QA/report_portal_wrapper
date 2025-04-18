@@ -35,7 +35,8 @@ class ReportPortalTest:
 
     def start_test(
             self, 
-            test_name: str, 
+            test_name: str,
+            item_type: str = "TEST",
             attributes: Optional[Dict[str, Any]] = None, 
             description: Optional[str] = None,
             parameters: Optional[dict] = None,
@@ -47,7 +48,7 @@ class ReportPortalTest:
             retry_of: Optional[str] = None,
             uuid: Optional[str] = None,
             **kwargs: Any
-    ):
+    ) -> str:
         """
         Starts a new test item in Report Portal.
 
@@ -69,7 +70,7 @@ class ReportPortalTest:
             self.item_id = self.client.start_test_item(
                 name=test_name,
                 start_time=timestamp(),
-                item_type="test",
+                item_type=item_type,
                 description=description,
                 attributes=attributes,
                 parameters=parameters,
@@ -82,6 +83,8 @@ class ReportPortalTest:
                 uuid=uuid,
                 **kwargs  
             )
+            return self.item_id
+
         except Exception as e:
             raise RuntimeError(f"Failed to start test '{test_name}': {e}")
 
