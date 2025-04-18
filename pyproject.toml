@@ -7,3 +7,7 @@ requires-python = ">=3.10"
 dependencies = [
     "reportportal-client>=5.6.4",
 ]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+reportportal-client= "^5.6.4"
