@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from .client import Client
 from .launcher import Launcher
 
 from .suite import Suite
@@ -10,7 +9,7 @@ class ReportPortal:
 
     def __init__(self, project_name: str, config_path: str = None):
         self.project_name = project_name
-        self.__launcher = Launcher(Client(config_path).create(project_name))
+        self.__launcher = Launcher()
 
     @property
     def launch(self):

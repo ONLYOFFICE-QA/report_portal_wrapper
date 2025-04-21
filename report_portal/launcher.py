@@ -1,18 +1,22 @@
-from reportportal_client import RPClient
+# -*- coding: utf-8 -*-
+from .client import Client
 from reportportal_client.helpers import timestamp
 from typing import  Any, Optional, Union
 
 
 class Launcher:
 
-    def __init__(self, client: RPClient):
-        self._client = client
+    def __init__(self, project_name: str, config_path: str = None):
+        self.project_name = project_name
+        self.config_path = config_path
+        self._client = None
         self.id = None
 
     @property
     def client(self):
         if not self._client:
             raise RuntimeError("Client is not initialized.")
+
         return self._client
 
     def start(
@@ -27,6 +31,9 @@ class Launcher:
     ) -> str:
         start_time = start_time or timestamp()  
         attributes = attributes or {}
+
+        self._client = Client(config_path=self.config_path).create(project_name=self.project_name)
+
         try:
             self.id = self._client.start_launch(
                 name=name,
