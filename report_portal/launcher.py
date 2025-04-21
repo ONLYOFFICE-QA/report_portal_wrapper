@@ -9,7 +9,8 @@ class Launcher:
         self._client = client
         self.launch_id = None
 
-    def get_client(self):
+    @property
+    def client(self):
         if not self._client:
             raise RuntimeError("Client is not initialized.")
         return self._client

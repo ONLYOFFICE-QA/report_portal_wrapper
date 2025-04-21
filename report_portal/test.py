@@ -1,12 +1,14 @@
 from reportportal_client.helpers import timestamp
-from reportportal_client import RPClient
 from reportportal_client.core.rp_issues import Issue
 from typing import Optional, Dict, Union, Any, Tuple
 
+from .launcher import Launcher
+
+
 class Test:
 
-    def __init__(self, client: RPClient):
-        self.client = client
+    def __init__(self, launcher: Launcher):
+        self.launcher = launcher
         self.item_id = None
 
     def get_item_id(self):
@@ -31,7 +33,7 @@ class Test:
             **kwargs: Any
     ) -> str:
         try:
-            self.item_id = self.client.start_test_item(
+            self.item_id = self.launcher.client.start_test_item(
                 name=test_name,
                 start_time=timestamp(),
                 item_type=item_type,
@@ -72,7 +74,7 @@ class Test:
             raise RuntimeError("Test item has not been started. Cannot finish the test.")
 
         try:
-            self.client.finish_test_item(
+            self.launcher.client.finish_test_item(
                 item_id=item_id,
                 end_time=timestamp(),
                 status=status,
@@ -119,7 +121,7 @@ class Test:
             raise RuntimeError("Cannot send log: No active test item. Start a test first.")
 
         try:
-            return self.client.log(
+            return self.launcher.client.log(
                 time=timestamp(), 
                 message=message, 
                 level=level, 

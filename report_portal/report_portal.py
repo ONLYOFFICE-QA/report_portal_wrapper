@@ -10,8 +10,7 @@ class ReportPortal:
 
     def __init__(self, project_name: str, config_path: str = None):
         self.project_name = project_name
-        self.client = Client(config_path).create(project_name)
-        self.__launcher = Launcher(self.client)
+        self.__launcher = Launcher(Client(config_path).create(project_name))
 
     @property
     def launch(self):
@@ -19,8 +18,8 @@ class ReportPortal:
 
     @property
     def test(self):
-        return Test(self.__launcher.get_client())
+        return Test(self.__launcher)
 
     @property
     def suite(self):
-        return Suite(self.__launcher.get_client())
+        return Suite(self.__launcher)
