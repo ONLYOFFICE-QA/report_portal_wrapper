@@ -6,6 +6,7 @@ from reportportal_client.helpers import timestamp
 
 
 class Suite:
+
     def __init__(self, client: RPClient):
         self.client = client
         self.item_id = None

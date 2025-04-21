@@ -3,11 +3,16 @@ from reportportal_client.helpers import timestamp
 from typing import  Any, Optional, Union
 
 
-class Launch:
+class Launcher:
 
     def __init__(self, client: RPClient):
-        self.client = client
+        self._client = client
         self.launch_id = None
+
+    def get_client(self):
+        if not self._client:
+            raise RuntimeError("Client is not initialized.")
+        return self._client
 
     def start(
         self, 
@@ -22,7 +27,7 @@ class Launch:
         start_time = start_time or timestamp()  
         attributes = attributes or {}
         try:
-            self.launch_id = self.client.start_launch(
+            self.launch_id = self._client.start_launch(
                 name=name,
                 start_time=start_time,
                 description=description,
@@ -51,18 +56,18 @@ class Launch:
         attributes = attributes or {}
 
         try:
-            self.client.finish_launch(
+            self._client.finish_launch(
                 end_time=end_time,
                 status=status,
                 attributes=attributes,
                 **kwargs  
             )
-            self.client.terminate()
+            self._client.terminate()
             self.launch_id = None
         except Exception as e:
             raise RuntimeError(f"Failed to finish launch '{self.launch_id}': {e}")
 
-        self.client.terminate()
+        self._client.terminate()
 
     def send_log(
             self, 
@@ -87,7 +92,7 @@ class Launch:
         time = time or timestamp()  
 
         try:
-            self.client.log(
+            self._client.log(
                 time=time,
                 message=message,
                 level=level,
