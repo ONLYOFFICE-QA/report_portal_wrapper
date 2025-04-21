@@ -7,7 +7,7 @@ class Launcher:
 
     def __init__(self, client: RPClient):
         self._client = client
-        self.launch_id = None
+        self.id = None
 
     @property
     def client(self):
@@ -28,7 +28,7 @@ class Launcher:
         start_time = start_time or timestamp()  
         attributes = attributes or {}
         try:
-            self.launch_id = self._client.start_launch(
+            self.id = self._client.start_launch(
                 name=name,
                 start_time=start_time,
                 description=description,
@@ -37,7 +37,7 @@ class Launcher:
                 rerun_of=rerun_of,
                 **kwargs
             )
-            return self.launch_id
+            return self.id
 
         except Exception as e:
             raise RuntimeError(f"Failed to start launch '{name}': {e}")
@@ -50,7 +50,7 @@ class Launcher:
         attributes: Optional[Union[list, dict]] = None,
         **kwargs: Any
     ):
-        if not self.launch_id:
+        if not self.id:
             raise RuntimeError("No active launch to finish.")
 
         end_time = end_time or timestamp() 
@@ -64,9 +64,9 @@ class Launcher:
                 **kwargs  
             )
             self._client.terminate()
-            self.launch_id = None
+            self.id = None
         except Exception as e:
-            raise RuntimeError(f"Failed to finish launch '{self.launch_id}': {e}")
+            raise RuntimeError(f"Failed to finish launch '{self.id}': {e}")
 
         self._client.terminate()
 
@@ -87,7 +87,7 @@ class Launcher:
         if print_output:
             print(f"[{level}] {message}")
 
-        if not self.launch_id:
+        if not self.id:
             raise RuntimeError("Cannot send log: No active launch. Please start a launch or connect to an existing one.")
 
         time = time or timestamp()  
