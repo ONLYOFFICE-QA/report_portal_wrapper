@@ -13,7 +13,7 @@ class ReportPortalTest:
             raise RuntimeError("Test item has not been started. Cannot finish the test.")
         return self.item_id
 
-    def start_test(
+    def start(
             self, 
             test_name: str,
             item_type: str = "TEST",
@@ -51,7 +51,7 @@ class ReportPortalTest:
         except Exception as e:
             raise RuntimeError(f"Failed to start test '{test_name}': {e}")
 
-    def finish_test(
+    def finish(
             self,
             return_code: int,
             test_id: str = None,
