@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from .client import Client
-from .report_portal_launcher import ReportPortalLauncher
-from .report_portal_test import ReportPortalTest
+from .launch import Launch
+
 from .suite import Suite
+from .test import Test
 
 
 class ReportPortal:
@@ -13,11 +14,11 @@ class ReportPortal:
 
     @property
     def launcher(self):
-        return ReportPortalLauncher(self.client)
+        return Launch(self.client)
 
     @property
     def test(self):
-        return ReportPortalTest(self.client)
+        return Test(self.client)
 
     @property
     def suite(self):

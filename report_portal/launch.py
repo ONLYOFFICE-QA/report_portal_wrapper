@@ -3,7 +3,7 @@ from reportportal_client.helpers import timestamp
 from typing import  Any, Optional, Union
 
 
-class ReportPortalLauncher:
+class Launch:
 
     def __init__(self, client: RPClient):
         self.client = client

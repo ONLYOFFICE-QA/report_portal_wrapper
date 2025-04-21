@@ -3,7 +3,8 @@ from reportportal_client import RPClient
 from reportportal_client.core.rp_issues import Issue
 from typing import Optional, Dict, Union, Any, Tuple
 
-class ReportPortalTest:
+class Test:
+
     def __init__(self, client: RPClient):
         self.client = client
         self.item_id = None
