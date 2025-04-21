@@ -9,7 +9,7 @@ class Launch:
         self.client = client
         self.launch_id = None
 
-    def start_launch(
+    def start(
         self, 
         name: str, 
         start_time: Optional[str] = None,
@@ -37,7 +37,7 @@ class Launch:
             raise RuntimeError(f"Failed to start launch '{name}': {e}")
 
 
-    def finish_launch(
+    def finish(
         self,
         end_time: Optional[str] = None,
         status: Optional[str] = "PASSED",
