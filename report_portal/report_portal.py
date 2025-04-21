@@ -13,7 +13,7 @@ class ReportPortal:
         self.client = Client(config_path).create(project_name)
 
     @property
-    def launcher(self):
+    def launch(self):
         return Launch(self.client)
 
     @property
