@@ -10,7 +10,7 @@ class Suite:
 
     def __init__(self, launcher: Launcher):
         self.launcher = launcher
-        self.item_id = None
+        self.id = None
 
     def start_suite(
             self,
@@ -45,25 +45,16 @@ class Suite:
                 uuid=uuid,
                 **kwargs
             )
-            self.item_id = item_id
+            self.id = item_id
             return item_id
 
         except Exception as e:
             raise RuntimeError(f"Failed to create: '{suite_name}': {e}")
 
     def finish_suite(self, suite_id: str = None):
-        item_id = suite_id or self.item_id
-        self.launcher.client.finish_test_item(item_id=item_id, end_time=timestamp())
+        self.launcher.client.finish_test_item(item_id=suite_id or self.id, end_time=timestamp())
 
-    def create(self, suite_name: str, parent_suite_id: str = None, cache: bool = False) -> str:
-        if not cache:
-            return self.start_suite(suite_name, parent_item_id=parent_suite_id)
-
-        cache_key = f"{suite_name}_{parent_suite_id}"
-        if cache_key in self._suite_cache:
-            suite_id = self._suite_cache[cache_key]
-        else:
-            suite_id = self.start_suite(suite_name, parent_item_id=parent_suite_id)
-            self._suite_cache[cache_key] = suite_id
-
+    def create(self, suite_name: str, parent_suite_id: str = None) -> str:
+        suite_id = self.start_suite(suite_name, parent_item_id=parent_suite_id)
+        self.finish_suite(suite_id)
         return suite_id

@@ -9,12 +9,12 @@ class Test:
 
     def __init__(self, launcher: Launcher):
         self.launcher = launcher
-        self.item_id = None
+        self.id = None
 
-    def get_item_id(self):
-        if not self.item_id:
+    def get_id(self):
+        if not self.id:
             raise RuntimeError("Test item has not been started. Cannot finish the test.")
-        return self.item_id
+        return self.id
 
     def start(
             self, 
@@ -33,7 +33,7 @@ class Test:
             **kwargs: Any
     ) -> str:
         try:
-            self.item_id = self.launcher.client.start_test_item(
+            test_id = self.launcher.client.start_test_item(
                 name=test_name,
                 start_time=timestamp(),
                 item_type=item_type,
@@ -49,7 +49,8 @@ class Test:
                 uuid=uuid,
                 **kwargs  
             )
-            return self.item_id
+            self.id = test_id
+            return test_id
 
         except Exception as e:
             raise RuntimeError(f"Failed to start test '{test_name}': {e}")
@@ -68,7 +69,7 @@ class Test:
             **kwargs: Any
     ):
         status = status or ("PASSED" if return_code == 0 else "FAILED")
-        item_id = test_id or self.item_id
+        item_id = test_id or self.id
 
         if not item_id:
             raise RuntimeError("Test item has not been started. Cannot finish the test.")
@@ -88,7 +89,7 @@ class Test:
             )
 
         except Exception as e:
-            raise RuntimeError(f"Failed to finish test with item ID '{self.item_id}' in ReportPortal: {str(e)}")
+            raise RuntimeError(f"Failed to finish test with item ID '{self.id}' in ReportPortal: {str(e)}")
 
 
     def send_log(
@@ -96,26 +97,15 @@ class Test:
         message: str, 
         level: Union[int, str] = "INFO", 
         attachment: Optional[dict] = None, 
-        item_id: Optional[str] = None,
+        test_id: Optional[str] = None,
         **kwargs: Any
         ) -> Optional[Tuple[str, ...]]:
-        """
-        Sends a log message related to the test item in Report Portal.
 
-        :param message: The log message.
-        :param level: The log level (INFO, DEBUG, WARN, ERROR, TRACE).
-        :param attachment: Optional attachment for the log.
-        :param item_id: The test item ID to associate the log with (default is the current test item).
-        :param kwargs: Additional parameters for the log request.
-        :raises ValueError: If the log level is invalid.
-        :raises RuntimeError: If sending the log fails.
-        :return: Optional tuple of log entry identifiers.
-        """
         valid_levels = ["INFO", "DEBUG", "WARN", "ERROR", "TRACE"]
         if isinstance(level, str) and level not in valid_levels:
             raise ValueError(f"Invalid log level: {level}. Must be one of {valid_levels}.")
 
-        item_id = item_id or self.item_id
+        item_id = test_id or self.id
 
         if not item_id:
             raise RuntimeError("Cannot send log: No active test item. Start a test first.")
