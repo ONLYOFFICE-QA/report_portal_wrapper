@@ -13,6 +13,7 @@ class Launcher:
         self.__client = client
         self.__RPClient = None
         self.id = None
+        self.uuid = None
         self.__launch_url_parts = f"{self.project_name}/launch"
         self.__launch_connected: bool = False
 
@@ -49,7 +50,7 @@ class Launcher:
             self._create_client(launch_uuid=uuid)
 
         try:
-            self.id = self.client.start_launch(
+            self.uuid = self.client.start_launch(
                 name=name,
                 start_time=start_time,
                 description=description,
@@ -58,11 +59,21 @@ class Launcher:
                 rerun_of=rerun_of,
                 **kwargs
             )
-            return self.id
+            return self.uuid
 
         except Exception as e:
             raise RuntimeError(f"Failed to start launch '{name}': {e}")
 
+    def get_launch_info(self, uuid: str = None):
+        _uuid = uuid or self.uuid
+        if not _uuid:
+            raise RuntimeError("Launch UUID is not set.")
+
+        return self.__client.request.get(f"{self.__launch_url_parts}/uuid/{uuid}")
+
+    def get_launch_id_by_uuid(self, uuid: str = None) -> int:
+        self.id = self.get_launch_info(uuid=uuid).get('id')
+        return self.id
 
     def get_uuids_by_name(
         self,
@@ -95,7 +106,7 @@ class Launcher:
         if page_size is not None:
             params["page.size"] = page_size
 
-        return self.__client.request.get(self.__launch_url_parts, params=params)
+        return self.__client.request.get(self.__launch_url_parts, params=params).get("content", [])
 
     def finish(
         self,
@@ -119,6 +130,8 @@ class Launcher:
             )
             self.client.terminate()
             self.id = None
+            self.uuid = None
+            self.__launch_connected = False
         except Exception as e:
             raise RuntimeError(f"Failed to finish launch '{self.id}': {e}")
 

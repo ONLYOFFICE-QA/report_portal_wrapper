@@ -10,7 +10,7 @@ class ReportPortalRequests:
         self.__endpoint = config["endpoint"]
         self.headers = self._get_headers()
 
-    def get(self, url_parts: str, params: dict = None):
+    def get(self, url_parts: str, params: dict = None) -> dict | None:
         headers = {
             "Authorization": f"Bearer {self.__api_key}"
         }
@@ -20,7 +20,7 @@ class ReportPortalRequests:
         response = requests.get(_url, headers=headers, params=params or {})
 
         if response.status_code == 200:
-            return response.json().get("content", [])
+            return response.json()
 
         print(f"|ERROR| Response to {_url} failed\nStatus code: {response.status_code}\nError: {response.text}")
         return None
@@ -32,4 +32,3 @@ class ReportPortalRequests:
         return {
             "Authorization": f"Bearer {self.__api_key}"
         }
-

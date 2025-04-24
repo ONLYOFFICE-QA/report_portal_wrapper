@@ -10,6 +10,7 @@ class Test:
     def __init__(self, launcher: Launcher):
         self.launcher = launcher
         self.id = None
+        self.__test_url_parts = f"{self.launcher.project_name}/item"
 
     def get_id(self):
         if not self.id:
