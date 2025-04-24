@@ -5,21 +5,24 @@ from typing import Dict, Any
 
 from reportportal_client import RPClient
 
+from .report_portal_requests import ReportPortalRequests
+
 
 class Client:
     def __init__(self, config_path: str = None):
         self.config_path = config_path or join(expanduser('~'), ".report_portal", "config.json")
+        self.config = self._load_config()
+        self.request = ReportPortalRequests(config=self.config)
         self.client = None
 
     def create(self, project_name: str, launch_uuid: str | None = None):
         """
         Creates an instance of RPClient with merged configuration.
         """
-        config = self._load_config()
         self.client = RPClient(
-            endpoint=config["endpoint"],
+            endpoint=self.config["endpoint"],
             project=project_name,
-            api_key=config["api_key"],
+            api_key=self.config["api_key"],
             launch_uuid=launch_uuid,
         )
 
@@ -37,17 +40,3 @@ class Client:
 
         except (FileNotFoundError, json.JSONDecodeError) as e:
             raise RuntimeError(f"Failed to load config from {self.config_path}: {e}")
-
-    def get(self):
-        """
-        Retrieves the initialized ReportPortal client.
-
-        :raises RuntimeError: If the client is not initialized.
-        :return: The initialized RPClient instance.
-        """
-        if not self.client:
-            raise RuntimeError("Client is not initialized.")
-
-        return self.client
-
-

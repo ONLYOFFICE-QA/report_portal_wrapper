@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from reportportal_client import RPClient
+
 from .client import Client
 from reportportal_client.helpers import timestamp
 from typing import  Any, Optional, Union
@@ -6,22 +8,32 @@ from typing import  Any, Optional, Union
 
 class Launcher:
 
-    def __init__(self, project_name: str, config_path: str = None):
+    def __init__(self, project_name: str, client: Client):
         self.project_name = project_name
-        self.config_path = config_path
-        self._client = None
+        self.__client = client
+        self.__RPClient = None
         self.id = None
+        self.__launch_url_parts = f"{self.project_name}/launch"
+        self.__launch_connected: bool = False
 
     @property
-    def client(self):
-        if not self._client:
+    def client(self) -> RPClient:
+        if not self.__RPClient:
             raise RuntimeError("Client is not initialized.")
 
-        return self._client
+        return self.__RPClient
+
+    def _create_client(self, launch_uuid: str = None) -> None:
+        self.__RPClient = self.__client.create(project_name=self.project_name, launch_uuid=launch_uuid)
+
+    def connect(self, launch_uuid: str):
+        self._create_client(launch_uuid=launch_uuid)
+        self.__launch_connected = True
 
     def start(
-        self, 
-        name: str, 
+        self,
+        name: str,
+        last_launch_connect: bool = False,
         start_time: Optional[str] = None,
         description: Optional[str] = None, 
         attributes: Optional[list | dict] = None,
@@ -32,10 +44,11 @@ class Launcher:
         start_time = start_time or timestamp()  
         attributes = attributes or {}
 
-        self._client = Client(config_path=self.config_path).create(project_name=self.project_name)
+        if not self.__launch_connected:
+            self._create_client(launch_uuid=self.get_uuids_by_name(launch_name=name)[-1] if last_launch_connect else None)
 
         try:
-            self.id = self._client.start_launch(
+            self.id = self.client.start_launch(
                 name=name,
                 start_time=start_time,
                 description=description,
@@ -49,6 +62,39 @@ class Launcher:
         except Exception as e:
             raise RuntimeError(f"Failed to start launch '{name}': {e}")
 
+
+    def get_uuids_by_name(
+        self,
+        launch_name: str,
+        status: str = None,
+        page: int = None,
+        page_size: int = None
+        ) -> list[str]:
+        launches = self.get_launches_by_name(launch_name=launch_name, status=status, page=page, page_size=page_size)
+        return [launch.get('uuid') for launch in launches]
+
+
+    def get_launches_by_name(
+            self,
+            launch_name: str,
+            status: str = None,
+            page: int = None,
+            page_size: int = None
+    ) -> list[dict]:
+        params = {
+            "filter.eq.name": launch_name,
+        }
+
+        if status is not None:
+            params["filter.eq.status"] = status
+
+        if page is not None:
+            params["page.page"] = page
+
+        if page_size is not None:
+            params["page.size"] = page_size
+
+        return self.__client.request.get(self.__launch_url_parts, params=params)
 
     def finish(
         self,
@@ -64,18 +110,18 @@ class Launcher:
         attributes = attributes or {}
 
         try:
-            self._client.finish_launch(
+            self.client.finish_launch(
                 end_time=end_time,
                 status=status,
                 attributes=attributes,
                 **kwargs  
             )
-            self._client.terminate()
+            self.client.terminate()
             self.id = None
         except Exception as e:
             raise RuntimeError(f"Failed to finish launch '{self.id}': {e}")
 
-        self._client.terminate()
+        self.client.terminate()
 
     def send_log(
             self, 
@@ -100,7 +146,7 @@ class Launcher:
         time = time or timestamp()  
 
         try:
-            self._client.log(
+            self.client.log(
                 time=time,
                 message=message,
                 level=level,
