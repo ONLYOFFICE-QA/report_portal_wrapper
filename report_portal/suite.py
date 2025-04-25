@@ -32,26 +32,6 @@ class Suite:
     def get_id(self, uuid: str = None):
         return self.get_info(uuid=uuid).get("id")
 
-    def get_suites(self):
-        launch_id = self.launcher.id or self.launcher.get_launch_id_by_uuid()
-        suites = []
-        page = 1
-        while True:
-            params = {
-                "filter.eq.type": "SUITE",
-                "filter.eq.launchId": launch_id,
-                "page.page": page,
-                "page.size": 100
-            }
-
-            data = self.launcher.auth.request.get(self.test_item.url_parts, params=params)
-            page_content = data.get("content", [])
-            suites.extend(page_content)
-
-            if data.get("page", {}).get("totalPages", 1) > page:
-                page += 1
-            else:
-                break
-
-        return suites
+    def get_suites(self) -> list[dict]:
+        return self.test_item.get_items_by_type()
 

@@ -40,3 +40,6 @@ class Test:
             attachment=attachment,
             **kwargs
         )
+
+    def get_tests(self) -> list[dict]:
+        return self.test_item.get_items()

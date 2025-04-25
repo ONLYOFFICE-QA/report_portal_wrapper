@@ -4,6 +4,7 @@ from .launcher import Launcher
 
 from .suite import Suite
 from .test import Test
+from .test_item import TestItem
 
 
 class ReportPortal:
@@ -22,3 +23,6 @@ class ReportPortal:
 
     def suite(self):
         return Suite(self.__launcher)
+
+    def test_item(self, item_type: str = "TEST") -> TestItem:
+        return TestItem(self.__launcher, item_type=item_type)

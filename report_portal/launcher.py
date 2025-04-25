@@ -6,16 +6,24 @@ from reportportal_client.helpers import timestamp
 from typing import  Any, Optional, Union
 
 
+
 class Launcher:
 
     def __init__(self, project_name: str, client: Client):
         self.project_name = project_name
         self.auth = client
         self.__RPClient = None
-        self.id = None
+        self.__id = None
         self.uuid = None
         self.__launch_url_parts = f"{self.project_name}/launch"
         self.__launch_connected: bool = False
+        self.create_client()
+
+    @property
+    def id(self) -> int:
+        if not self.__id:
+            self.__id = self.get_launch_id_by_uuid()
+        return self.__id
 
     @property
     def client(self) -> RPClient:
@@ -24,11 +32,11 @@ class Launcher:
 
         return self.__RPClient
 
-    def _create_client(self, launch_uuid: str = None) -> None:
+    def create_client(self, launch_uuid: str = None) -> None:
         self.__RPClient = self.auth.create(project_name=self.project_name, launch_uuid=launch_uuid)
 
     def connect(self, launch_uuid: str):
-        self._create_client(launch_uuid=launch_uuid)
+        self.create_client(launch_uuid=launch_uuid)
         self.__launch_connected = True
 
     def start(
@@ -47,7 +55,7 @@ class Launcher:
 
         if not self.__launch_connected:
             uuid = self.get_last_launch_uuid(launch_name=name) if last_launch_connect else None
-            self._create_client(launch_uuid=uuid)
+            self.create_client(launch_uuid=uuid)
 
         try:
             self.uuid = self.client.start_launch(
@@ -72,8 +80,8 @@ class Launcher:
         return self.auth.request.get(f"{self.__launch_url_parts}/uuid/{_uuid}")
 
     def get_launch_id_by_uuid(self, uuid: str = None) -> int:
-        self.id = self.get_launch_info(uuid=uuid)
-        return self.id.get('id') if self.id else None
+        self.__id = self.get_launch_info(uuid=uuid)
+        return self.__id.get('id') if self.__id else None
 
     def get_last_launch_uuid(self, launch_name: str) -> Optional[str]:
         uuids = self.get_uuids_by_name(launch_name=launch_name)

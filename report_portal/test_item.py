@@ -9,8 +9,8 @@ from .launcher import Launcher
 
 class TestItem:
 
-    def __init__(self, launcher: Launcher, item_type: str):
-        self.item_type = item_type
+    def __init__(self, launcher: Launcher, item_type: str = "TEST"):
+        self.item_type = item_type.upper()
         self.launcher = launcher
         self.item_uuid = None
         self.url_parts = f"{self.launcher.project_name}/item"
@@ -123,3 +123,34 @@ class TestItem:
 
         except Exception as e:
             raise RuntimeError(f"Failed to send log message to ReportPortal: {str(e)}")
+
+    def get_items(self, params: dict = None, page_size: int = 100) -> list[dict]:
+        launch_id = self.launcher.id
+        items = []
+        page = 1
+        base_params = {
+            "filter.eq.launchId": launch_id,
+            "page.size": page_size
+        }
+
+        if params:
+            base_params.update(params)
+
+        while True:
+            base_params["page.page"] = page
+            data = self.launcher.auth.request.get(self.url_parts, params=base_params)
+            page_content = data.get("content", [])
+            items.extend(page_content)
+
+            if page > data.get("page", {}).get("totalPages", 1):
+                break
+
+            page += 1
+
+        return items
+
+    def get_items_by_type(self):
+        params = {
+            "filter.eq.type": f"{self.item_type}",
+        }
+        return self.get_items(params=params)
