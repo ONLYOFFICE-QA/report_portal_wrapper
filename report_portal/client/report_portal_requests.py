@@ -47,6 +47,56 @@ class ReportPortalRequests:
 
         return None
 
+    def get_items(
+            self,
+            url_parts: str,
+            filter_by_name: str = None,
+            filter_by_status: str = None,
+            filter_by_launch_id: str = None,
+            filter_by_type: str = None,
+            page_size: int = 100,
+            addition_params: dict = None,
+            max_retries: int = 3,
+            interval: float = 0.5,
+            sort: str = None
+    ) -> list[dict]:
+        items = []
+        page = 1
+        _params = { "page.size": page_size }
+
+        if filter_by_name:
+            _params["filter.eq.name"] = filter_by_name
+
+        if addition_params:
+            _params.update(addition_params)
+
+        if sort:
+            _params["sort"] = sort
+
+        if filter_by_status:
+            _params["filter.eq.status"] = filter_by_status.upper()
+
+        if filter_by_launch_id:
+            _params["filter.eq.launchId"] = filter_by_launch_id
+
+        if filter_by_type:
+            _params["filter.eq.type"] = filter_by_type.upper()
+
+        while True:
+            _params["page.page"] = page
+            data = self.get(url_parts, params=_params, max_retries=max_retries, interval=interval)
+            page_content = data.get("content", [])
+            items.extend(page_content)
+
+            if page > data.get("page", {}).get("totalPages", 1):
+                break
+
+            page += 1
+
+        return items
+
+
+
     def _get_base_url(self) -> str:
         return f"{self.__endpoint}/api/{self.api_version}"
 
