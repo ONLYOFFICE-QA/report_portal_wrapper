@@ -93,8 +93,7 @@ class Launcher:
         _uuid = uuid or self.uuid
         if not _uuid:
             raise RuntimeError("Launch UUID is not set.")
-
-        return self.auth.request.get(f"{self.__launch_url_parts}/uuid/{_uuid}")
+        return self.auth.request.get_info(url_parts=self.__launch_url_parts, uuid=_uuid)
 
     def get_launch_id_by_uuid(self, uuid: str = None) -> int:
         self.__id = self.get_launch_info(uuid=uuid)

@@ -54,8 +54,7 @@ class TestItem:
             raise RuntimeError(f"Failed to start item '{name}': {e}")
 
     def get_info(self, uuid: str = None):
-        _uuid = uuid or self.item_uuid
-        return self.launcher.auth.request.get(f"{self.url_parts}/uuid/{_uuid}")
+        return self.launcher.auth.request.get_info(url_parts=self.url_parts, uuid=uuid or self.item_uuid)
 
     def finish(
             self,

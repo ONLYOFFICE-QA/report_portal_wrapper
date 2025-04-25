@@ -18,6 +18,7 @@ def singleton(class_):
 
 @singleton
 class ReportPortalRequests:
+    __cache_info = {}
 
     def __init__(self, config: dict, api_version: str = "v1"):
         self.session = requests.Session()
@@ -46,6 +47,13 @@ class ReportPortalRequests:
                     time.sleep(interval)
 
         return None
+
+    def get_info(self, url_parts: str, uuid: str) -> dict | None:
+        cache_key = f"{url_parts}/{uuid}"
+        if cache_key not in self.__cache_info:
+            self.__cache_info[cache_key] = self.get(f"{url_parts}/uuid/{uuid}")
+
+        return self.__cache_info[cache_key]
 
     def get_items(
             self,
