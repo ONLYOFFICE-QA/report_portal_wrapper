@@ -1,28 +1,50 @@
 # -*- coding: utf-8 -*-
+import time
+from functools import wraps
+
 import requests
 
+
+def singleton(class_):
+    __instances = {}
+
+    @wraps(class_)
+    def getinstance(*args, **kwargs):
+        if class_ not in __instances:
+            __instances[class_] = class_(*args, **kwargs)
+        return __instances[class_]
+
+    return getinstance
+
+@singleton
 class ReportPortalRequests:
 
     def __init__(self, config: dict, api_version: str = "v1"):
+        self.session = requests.Session()
         self.api_version = api_version
         self.config = config
         self.__api_key = config["api_key"]
         self.__endpoint = config["endpoint"]
         self.headers = self._get_headers()
+        self.base_url = self._get_base_url()
 
-    def get(self, url_parts: str, params: dict = None) -> dict | None:
-        headers = {
-            "Authorization": f"Bearer {self.__api_key}"
-        }
+    def get(self, url_parts: str, params: dict = None, max_retries: int = 3, interval: float = 0.5) -> dict | None:
+        _url = f"{self.base_url}/{url_parts}"
 
-        _url = f"{self._get_base_url()}/{url_parts}"
+        for attempt in range(max_retries):
+            response = self.session.request(method="GET", url=_url, params=params or {}, headers=self.headers)
 
-        response = requests.get(_url, headers=headers, params=params or {})
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(
+                    f"|ERROR| Attempt {attempt + 1} failed for {_url}\n"
+                    f"Status code: {response.status_code}\nError: {response.text}"
+                )
 
-        if response.status_code == 200:
-            return response.json()
+                if attempt < max_retries - 1:
+                    time.sleep(interval)
 
-        print(f"|ERROR| Response to {_url} failed\nStatus code: {response.status_code}\nError: {response.text}")
         return None
 
     def _get_base_url(self) -> str:
