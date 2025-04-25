@@ -93,6 +93,18 @@ class TestItem:
         except Exception as e:
             raise RuntimeError(f"Failed to finish test with item ID '{self.id}' in ReportPortal: {str(e)}")
 
+    def update(
+        self,
+            item_uuid: str,
+            attributes: Optional[Union[list, dict]] = None,
+            description: Optional[str] = None
+    ) -> Optional[str]:
+        self.launcher.client.update_test_item(
+            item_uuid=item_uuid,
+            attributes=attributes,
+            description=description
+        )
+
     def send_log(
             self,
             message: str,

@@ -17,6 +17,14 @@ class Test:
             raise RuntimeError("Test item has not been started. Cannot finish the test.")
         return self.test_item.item_uuid
 
+    def update(
+            self,
+            item_uuid: str,
+            attributes: Optional[Union[list, dict]] = None,
+            description: Optional[str] = None
+    ) -> Optional[str]:
+        return self.test_item.update(item_uuid=item_uuid, attributes=attributes, description=description)
+
     def get_info(self, uuid: str = None):
         return self.test_item.get_info(uuid=uuid)
 
