@@ -158,8 +158,8 @@ class Launcher:
                 **kwargs  
             )
             self.client.terminate()
-            self.id = None
-            self.uuid = None
+            self.__id = None
+            self.__uuid = None
             self.__launch_connected = False
         except Exception as e:
             raise RuntimeError(f"Failed to finish launch '{self.id}': {e}")
