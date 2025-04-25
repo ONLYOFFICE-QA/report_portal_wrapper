@@ -91,8 +91,6 @@ class ReportPortalRequests:
 
         return items
 
-
-
     def _get_base_url(self) -> str:
         return f"{self.__endpoint}/api/{self.api_version}"
 
