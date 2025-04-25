@@ -10,7 +10,7 @@ class Launcher:
 
     def __init__(self, project_name: str, client: Client):
         self.project_name = project_name
-        self.__client = client
+        self.auth = client
         self.__RPClient = None
         self.id = None
         self.uuid = None
@@ -25,7 +25,7 @@ class Launcher:
         return self.__RPClient
 
     def _create_client(self, launch_uuid: str = None) -> None:
-        self.__RPClient = self.__client.create(project_name=self.project_name, launch_uuid=launch_uuid)
+        self.__RPClient = self.auth.create(project_name=self.project_name, launch_uuid=launch_uuid)
 
     def connect(self, launch_uuid: str):
         self._create_client(launch_uuid=launch_uuid)
@@ -42,11 +42,12 @@ class Launcher:
         rerun_of: Optional[str] = None,
         **kwargs
     ) -> str:
-        start_time = start_time or timestamp()  
+        start_time = start_time or timestamp()
         attributes = attributes or {}
 
         if not self.__launch_connected:
-            uuid = self.get_uuids_by_name(launch_name=name)[-1] if last_launch_connect else None
+            print(1)
+            uuid = self.get_last_launch_uuid(launch_name=name) if last_launch_connect else None
             self._create_client(launch_uuid=uuid)
 
         try:
@@ -69,11 +70,15 @@ class Launcher:
         if not _uuid:
             raise RuntimeError("Launch UUID is not set.")
 
-        return self.__client.request.get(f"{self.__launch_url_parts}/uuid/{uuid}")
+        return self.auth.request.get(f"{self.__launch_url_parts}/uuid/{_uuid}")
 
     def get_launch_id_by_uuid(self, uuid: str = None) -> int:
-        self.id = self.get_launch_info(uuid=uuid).get('id')
-        return self.id
+        self.id = self.get_launch_info(uuid=uuid)
+        return self.id.get('id') if self.id else None
+
+    def get_last_launch_uuid(self, launch_name: str) -> Optional[str]:
+        uuids = self.get_uuids_by_name(launch_name=launch_name)
+        return uuids[-1] if uuids else None
 
     def get_uuids_by_name(
         self,
@@ -106,7 +111,7 @@ class Launcher:
         if page_size is not None:
             params["page.size"] = page_size
 
-        return self.__client.request.get(self.__launch_url_parts, params=params).get("content", [])
+        return self.auth.request.get(self.__launch_url_parts, params=params).get("content", [])
 
     def finish(
         self,
@@ -115,7 +120,7 @@ class Launcher:
         attributes: Optional[Union[list, dict]] = None,
         **kwargs: Any
     ):
-        if not self.id:
+        if not self.uuid:
             raise RuntimeError("No active launch to finish.")
 
         end_time = end_time or timestamp() 
