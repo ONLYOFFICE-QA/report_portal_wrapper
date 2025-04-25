@@ -42,4 +42,4 @@ class Test:
         )
 
     def get_tests(self) -> list[dict]:
-        return self.test_item.get_items()
+        return self.test_item.get_items_by_type()

@@ -14,16 +14,32 @@ class Launcher:
         self.auth = client
         self.__RPClient = None
         self.__id = None
-        self.uuid = None
+        self.__uuid = None
         self.__launch_url_parts = f"{self.project_name}/launch"
         self.__launch_connected: bool = False
+        self.url_parts = f"{self.project_name}/launch"
         self.create_client()
+
+    def get_launches(self, filter_by_name: str = None, page_size: int = 100) -> list[dict]:
+        return self.auth.request.get_items(
+            self.url_parts,
+            page_size=page_size,
+            filter_by_name=filter_by_name,
+            sort="start_time,desc"
+        )
 
     @property
     def id(self) -> int:
         if not self.__id:
             self.__id = self.get_launch_id_by_uuid()
         return self.__id
+
+    @property
+    def uuid(self) -> str:
+        if not self.__uuid:
+            raise RuntimeError("Launch is not initialised.")
+
+        return self.__uuid
 
     @property
     def client(self) -> RPClient:
@@ -58,7 +74,7 @@ class Launcher:
             self.create_client(launch_uuid=uuid)
 
         try:
-            self.uuid = self.client.start_launch(
+            _uuid = self.client.start_launch(
                 name=name,
                 start_time=start_time,
                 description=description,
@@ -67,7 +83,8 @@ class Launcher:
                 rerun_of=rerun_of,
                 **kwargs
             )
-            return self.uuid
+            self.__uuid = _uuid
+            return _uuid
 
         except Exception as e:
             raise RuntimeError(f"Failed to start launch '{name}': {e}")

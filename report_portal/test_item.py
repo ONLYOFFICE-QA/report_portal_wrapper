@@ -124,33 +124,17 @@ class TestItem:
         except Exception as e:
             raise RuntimeError(f"Failed to send log message to ReportPortal: {str(e)}")
 
-    def get_items(self, params: dict = None, page_size: int = 100) -> list[dict]:
-        launch_id = self.launcher.id
-        items = []
-        page = 1
-        base_params = {
-            "filter.eq.launchId": launch_id,
-            "page.size": page_size
-        }
+    def get_items(self, page_size: int = 100) -> list[dict]:
+        return self.launcher.auth.request.get_items(
+            self.url_parts,
+            filter_by_launch_id=self.launcher.id,
+            page_size=page_size
+        )
 
-        if params:
-            base_params.update(params)
-
-        while True:
-            base_params["page.page"] = page
-            data = self.launcher.auth.request.get(self.url_parts, params=base_params)
-            page_content = data.get("content", [])
-            items.extend(page_content)
-
-            if page > data.get("page", {}).get("totalPages", 1):
-                break
-
-            page += 1
-
-        return items
-
-    def get_items_by_type(self):
-        params = {
-            "filter.eq.type": f"{self.item_type}",
-        }
-        return self.get_items(params=params)
+    def get_items_by_type(self, page_size: int = 100):
+        return self.launcher.auth.request.get_items(
+            self.url_parts,
+            filter_by_launch_id=self.launcher.id,
+            filter_by_type=self.item_type,
+            page_size=page_size
+        )

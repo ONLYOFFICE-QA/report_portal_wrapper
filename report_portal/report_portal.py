@@ -26,3 +26,14 @@ class ReportPortal:
 
     def test_item(self, item_type: str = "TEST") -> TestItem:
         return TestItem(self.__launcher, item_type=item_type)
+
+    def get_launches(self, filter_by_name: str = None, page_size: int = 100) -> list[dict]:
+        return self.launch.get_launches(filter_by_name=filter_by_name, page_size=page_size)
+
+    def get_items(self, name: str = None, item_type: str = None, page_size: int = 100) -> list[dict]:
+        return self.client.request.get_items(
+            url_parts=f"{self.project_name}/item",
+            page_size=page_size,
+            filter_by_name=name,
+            filter_by_type=item_type,
+        )

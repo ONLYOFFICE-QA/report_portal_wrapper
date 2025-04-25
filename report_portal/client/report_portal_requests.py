@@ -62,25 +62,21 @@ class ReportPortalRequests:
     ) -> list[dict]:
         items = []
         page = 1
-        _params = { "page.size": page_size }
 
-        if filter_by_name:
-            _params["filter.eq.name"] = filter_by_name
+        _params = {
+            "page.size": page_size,
+            **(addition_params or {})
+        }
 
-        if addition_params:
-            _params.update(addition_params)
+        filters = {
+            "filter.eq.name": filter_by_name,
+            "filter.eq.status": filter_by_status.upper() if filter_by_status else None,
+            "filter.eq.launchId": filter_by_launch_id,
+            "filter.eq.type": filter_by_type.upper() if filter_by_type else None,
+            "sort": sort
+        }
 
-        if sort:
-            _params["sort"] = sort
-
-        if filter_by_status:
-            _params["filter.eq.status"] = filter_by_status.upper()
-
-        if filter_by_launch_id:
-            _params["filter.eq.launchId"] = filter_by_launch_id
-
-        if filter_by_type:
-            _params["filter.eq.type"] = filter_by_type.upper()
+        _params.update({key: value for key, value in filters.items() if value is not None})
 
         while True:
             _params["page.page"] = page
