@@ -12,7 +12,7 @@ class TestItem:
     def __init__(self, launcher: Launcher, item_type: str):
         self.item_type = item_type
         self.launcher = launcher
-        self.item_id = None
+        self.item_uuid = None
         self.url_parts = f"{self.launcher.project_name}/item"
 
     def start(
@@ -31,7 +31,7 @@ class TestItem:
             **kwargs: Any
     ) -> str:
         try:
-            item_id = self.launcher.client.start_test_item(
+            _item_uuid = self.launcher.client.start_test_item(
                 name=name,
                 start_time=timestamp(),
                 item_type=self.item_type,
@@ -47,11 +47,15 @@ class TestItem:
                 uuid=uuid,
                 **kwargs
             )
-            self.item_id = item_id
-            return item_id
+            self.item_uuid = _item_uuid
+            return _item_uuid
 
         except Exception as e:
-            raise RuntimeError(f"Failed to start test '{test_name}': {e}")
+            raise RuntimeError(f"Failed to start item '{name}': {e}")
+
+    def get_info(self, uuid: str = None):
+        _uuid = uuid or self.item_uuid
+        return self.launcher.auth.request.get(f"{self.url_parts}/uuid/{_uuid}")
 
     def finish(
             self,
@@ -67,7 +71,7 @@ class TestItem:
             **kwargs: Any
     ):
         status = status or ("PASSED" if return_code == 0 else "FAILED")
-        item_id = item_id or self.item_id
+        item_id = item_id or self.item_uuid
 
         if not item_id:
             raise RuntimeError("Test item has not been started. Cannot finish the test.")
@@ -102,7 +106,8 @@ class TestItem:
         if isinstance(level, str) and level not in valid_levels:
             raise ValueError(f"Invalid log level: {level}. Must be one of {valid_levels}.")
 
-        item_id = item_id or self.item_id
+        item_id = item_id or self.item_uuid
+
         if not item_id:
             raise RuntimeError("Cannot send log: No active test item. Start a test first.")
 

@@ -46,7 +46,6 @@ class Launcher:
         attributes = attributes or {}
 
         if not self.__launch_connected:
-            print(1)
             uuid = self.get_last_launch_uuid(launch_name=name) if last_launch_connect else None
             self._create_client(launch_uuid=uuid)
 
