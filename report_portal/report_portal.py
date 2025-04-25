@@ -15,13 +15,13 @@ class ReportPortal:
         self.__launcher = Launcher(project_name=project_name, client=self.client)
 
     @property
-    def launch(self):
+    def launch(self) -> Launcher:
         return self.__launcher
 
-    def create_test(self, name: str):
+    def create_test(self, name: str) -> Test:
         return Test(self.__launcher, name=name)
 
-    def suite(self):
+    def suite(self) -> Suite:
         return Suite(self.__launcher)
 
     def test_item(self, item_type: str = "TEST") -> TestItem:
