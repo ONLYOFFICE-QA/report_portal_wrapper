@@ -7,7 +7,7 @@ class Suite:
 
     def __init__(self, launcher: Launcher):
         self.launcher = launcher
-        self.test_item = TestItem(launcher=self.launcher, item_type="TEST")
+        self.test_item = TestItem(launcher=self.launcher, item_type="SUITE")
 
     def start(self, suite_name: str, **kwargs) -> str:
         return self.test_item.start(name=suite_name, **kwargs)
