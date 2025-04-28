@@ -2,7 +2,6 @@
 import time
 import requests
 
-from report_portal.utils.cache import Cache
 from .config import Config
 from ..utils import singleton, cacheable
 
@@ -49,6 +48,7 @@ class ReportPortalRequests:
 
         return None
 
+    @cacheable()
     def get_info(self, url_parts: str, uuid: str, cache: bool = True, ttl: int = None) -> dict | None:
         return self.get(f"{url_parts}/uuid/{uuid}", cache=cache, ttl=ttl)
 
