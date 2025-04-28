@@ -12,7 +12,7 @@ class LaunchInfo(TestItemInfo):
         super().__init__(rp_requests=rp_requests, url_parts=url_parts, item_type="TEST")
         self.url_parts = url_parts.launch
 
-    def get_launch_id_by_uuid(self, uuid: str = None, cache: bool = True, ttl: int = None) -> str | None:
+    def get_launch_id_by_uuid(self, uuid: str, cache: bool = True, ttl: int = None) -> str | None:
         return self.get_id(uuid=uuid, cache=cache, ttl=ttl)
 
     def get_last_launch_uuid(self, by_name: str = None, cache: bool = True, ttl: int = None) -> Optional[str]:

@@ -10,7 +10,7 @@ class Suite(TestItem):
         self.info = launcher.info_client.suite
 
 
-    def create(self, suite_name: str, parent_suite_id: str = None, **kwargs) -> str:
-        suite_uuid = self.start(suite_name=suite_name, parent_suite_uuid=parent_suite_id, **kwargs)
+    def create(self, name: str, parent_item_id: str = None, **kwargs) -> str:
+        suite_uuid = self.start(name=name, parent_item_id=parent_item_id, **kwargs)
         self.finish(return_code=0, suite_uuid=suite_uuid, **kwargs)
         return suite_uuid
