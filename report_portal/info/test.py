@@ -9,9 +9,14 @@ class TestInfo(TestItemInfo):
     def __init__(self, rp_requests: ReportPortalRequests, url_parts: UrlParts):
         super().__init__(rp_requests=rp_requests, url_parts=url_parts, item_type="TEST")
 
-    def get_tests(self, launch_id: str, page_size: int = 100, cache: bool = False, ttl: int = None) -> list[dict]:
-        return self.rp_request.get_items(
-            self.url_parts,
+    def get_tests(
+            self,
+            launch_id: str,
+            page_size: int = 100,
+            cache: bool = False,
+            ttl: int = None
+    ) -> list[dict]:
+        return self.get_items(
             filter_by_launch_id=launch_id,
             filter_by_type=self.item_type,
             page_size=page_size,

@@ -14,7 +14,7 @@ class TestItem:
         self.launcher = launcher
         self.__item_uuid = None
         self.__item_id = None
-        self.info = launcher.info.test_item
+        self.info =launcher.info_client.test_item
 
     @property
     def id(self):
