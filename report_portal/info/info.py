@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from report_portal.client import ReportPortalRequests
-from report_portal.info.launch import LaunchInfo
-from report_portal.info.suite import SuiteInfo
-from report_portal.info.test import TestInfo
-from report_portal.info.test_item import TestItemInfo
-from report_portal.info.url_parts import UrlParts
+from ..client import ReportPortalRequests
+from .launch import LaunchInfo
+from .suite import SuiteInfo
+from .test import TestInfo
+from .test_item import TestItemInfo
+from .url_parts import UrlParts
 
 
 class Info:
