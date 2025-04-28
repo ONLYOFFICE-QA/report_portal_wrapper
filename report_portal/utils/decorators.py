@@ -20,8 +20,6 @@ def cacheable(default_ttl: int = None):
             if not use_cache:
                 return func(self, *args, **kwargs)
 
-
-
             cache_key = f"{func.__name__}:{args}:{str(cache_kwargs)}"
 
             cached = self.__method_cache.get(cache_key)
