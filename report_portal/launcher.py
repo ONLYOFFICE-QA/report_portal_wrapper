@@ -157,7 +157,7 @@ class Launcher:
 
     def get_last_launch_uuid(self, launch_name: str, cache: bool = True, ttl: int = None) -> Optional[str]:
         uuids = self.get_uuids_by_name(launch_name=launch_name, cache=cache, ttl=ttl)
-        uuids.sort(key=lambda x: x.get('start_time'), reverse=True)
+        # uuids.sort(key=lambda x: x.get('start_time'), reverse=True)
         return uuids[-1] if uuids else None
 
     def get_uuids_by_name(self, launch_name: str, status: str = None, cache: bool = False, ttl: int = None) -> list[str]:

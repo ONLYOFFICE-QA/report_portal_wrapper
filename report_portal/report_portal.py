@@ -18,11 +18,10 @@ class ReportPortal:
     def launch(self) -> Launcher:
         return self.__launcher
 
-    def test(self) -> Test:
-        return Test(self.__launcher)
+    def get_launch_test(self) -> Test:
+        return Test(launcher=self.__launcher)
 
-    @property
-    def suite(self) -> Suite:
+    def get_launch_suite(self) -> Suite:
         return Suite(self.__launcher)
 
     def test_item(self, item_type: str = "TEST") -> TestItem:
