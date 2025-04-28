@@ -16,12 +16,16 @@ class LaunchInfo(TestItemInfo):
         return self.get_id(uuid=uuid, cache=cache, ttl=ttl)
 
     def get_last_launch_uuid(self, by_name: str = None, cache: bool = True, ttl: int = None) -> Optional[str]:
-        uuids = self.get_uuids_by_name(launch_name=by_name, cache=cache, ttl=ttl)
-        return uuids[-1] if uuids else None
+        last_launch = self.get_last_launch(by_name=by_name, cache=cache, ttl=ttl)
+        return last_launch.get('uuid') if last_launch else None
 
     def get_uuids_by_name(self, launch_name: str, status: str = None, cache: bool = False, ttl: int = None) -> list[str]:
         launches = self.get_launches(by_name=launch_name, status=status, cache=cache, ttl=ttl)
         return [launch.get('uuid') for launch in launches]
+
+    def get_last_launch(self, by_name: str = None, status: str = None, cache: bool = True, ttl: int = None):
+        launches = self.get_launches(by_name=by_name, status=status, cache=cache, ttl=ttl)
+        return launches[-1] if launches else []
 
     def get_launches(
             self,
