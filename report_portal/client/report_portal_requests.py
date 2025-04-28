@@ -1,35 +1,36 @@
 # -*- coding: utf-8 -*-
 import time
-from functools import wraps
-
 import requests
 
+from report_portal.utils.cache import Cache
+from .config import Config
+from ..utils import singleton, cacheable
 
-def singleton(class_):
-    __instances = {}
-
-    @wraps(class_)
-    def getinstance(*args, **kwargs):
-        if class_ not in __instances:
-            __instances[class_] = class_(*args, **kwargs)
-        return __instances[class_]
-
-    return getinstance
 
 @singleton
 class ReportPortalRequests:
-    __cache_info = {}
 
-    def __init__(self, config: dict, api_version: str = "v1"):
+    def __init__(self, config: Config):
         self.session = requests.Session()
-        self.api_version = api_version
         self.config = config
-        self.__api_key = config["api_key"]
-        self.__endpoint = config["endpoint"]
+        self.__api_key = config.api_key
+        self.__endpoint = config.endpoint
+        self.api_version = self._validate_api_version(version=self.config.api_version or "v1")
         self.headers = self._get_headers()
         self.base_url = self._get_base_url()
 
-    def get(self, url_parts: str, params: dict = None, max_retries: int = 3, interval: float = 0.5) -> dict | None:
+    @cacheable()
+    def get(
+            self,
+            url_parts: str,
+            params: dict = None,
+            max_retries: int = 3,
+            interval: float = 0.5,
+            cache: bool = False,
+            ttl: int = None
+    ) -> dict | None:
+        f"""|INFO| Parameters {cache} and {ttl} for cacheable decorator"""
+
         _url = f"{self.base_url}/{url_parts}"
 
         for attempt in range(max_retries):
@@ -48,12 +49,8 @@ class ReportPortalRequests:
 
         return None
 
-    def get_info(self, url_parts: str, uuid: str) -> dict | None:
-        cache_key = f"{url_parts}/{uuid}"
-        if cache_key not in self.__cache_info:
-            self.__cache_info[cache_key] = self.get(f"{url_parts}/uuid/{uuid}")
-
-        return self.__cache_info[cache_key]
+    def get_info(self, url_parts: str, uuid: str, cache: bool = True, ttl: int = None) -> dict | None:
+        return self.get(f"{url_parts}/uuid/{uuid}", cache=cache, ttl=ttl)
 
     def get_items(
             self,
@@ -66,7 +63,9 @@ class ReportPortalRequests:
             addition_params: dict = None,
             max_retries: int = 3,
             interval: float = 0.5,
-            sort: str = None
+            sort: str = None,
+            cache: bool = False,
+            ttl: int = None
     ) -> list[dict]:
         items = []
         page = 1
@@ -88,7 +87,7 @@ class ReportPortalRequests:
 
         while True:
             _params["page.page"] = page
-            data = self.get(url_parts, params=_params, max_retries=max_retries, interval=interval)
+            data = self.get(url_parts, params=_params, max_retries=max_retries, interval=interval, cache=cache, ttl=ttl)
             page_content = data.get("content", [])
             items.extend(page_content)
 
@@ -106,3 +105,11 @@ class ReportPortalRequests:
         return {
             "Authorization": f"Bearer {self.__api_key}"
         }
+
+    @staticmethod
+    def _validate_api_version(version: str) -> str:
+        _api_version = version.lower()
+        if _api_version not in ["v1", "v2"]:
+            raise ValueError(f"Invalid API version: {_api_version}. Must be one of ['v1', 'v2'].")
+
+        return _api_version

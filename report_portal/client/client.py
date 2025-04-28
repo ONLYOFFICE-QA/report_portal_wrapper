@@ -5,24 +5,25 @@ from typing import Dict, Any
 
 from reportportal_client import RPClient
 
+from .config import Config
 from .report_portal_requests import ReportPortalRequests
 
 
 class Client:
     def __init__(self, config_path: str = None):
         self.config_path = config_path or join(expanduser('~'), ".report_portal", "config.json")
-        self.config = self._load_config()
+        self.config = Config()
         self.request = ReportPortalRequests(config=self.config)
         self.client = None
 
-    def create(self, project_name: str, launch_uuid: str | None = None):
+    def create_rpclient(self, project_name: str, launch_uuid: str | None = None):
         """
         Creates an instance of RPClient with merged configuration.
         """
         self.client = RPClient(
-            endpoint=self.config["endpoint"],
+            endpoint=self.config.endpoint,
             project=project_name,
-            api_key=self.config["api_key"],
+            api_key=self.config.api_key,
             launch_uuid=launch_uuid,
         )
 

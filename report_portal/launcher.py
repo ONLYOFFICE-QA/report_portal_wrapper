@@ -11,7 +11,7 @@ class Launcher:
 
     def __init__(self, project_name: str, client: Client):
         self.project_name = project_name
-        self.auth = client
+        self.rp_client = client
         self.__RPClient = None
         self.__id = None
         self.__uuid = None
@@ -20,11 +20,12 @@ class Launcher:
         self.url_parts = f"{self.project_name}/launch"
         self.create_client()
 
-    def get_launches(self, filter_by_name: str = None, page_size: int = 100) -> list[dict]:
-        return self.auth.request.get_items(
+    def get_launches(self, filter_by_name: str = None, status: str = None, page_size: int = 100) -> list[dict]:
+        return self.rp_client.request.get_items(
             self.url_parts,
             page_size=page_size,
             filter_by_name=filter_by_name,
+            filter_by_status=status,
             sort="start_time,desc"
         )
 
@@ -49,7 +50,7 @@ class Launcher:
         return self.__RPClient
 
     def create_client(self, launch_uuid: str = None) -> None:
-        self.__RPClient = self.auth.create(project_name=self.project_name, launch_uuid=launch_uuid)
+        self.__RPClient = self.rp_client.create_rpclient(project_name=self.project_name, launch_uuid=launch_uuid)
 
     def connect(self, launch_uuid: str):
         self.create_client(launch_uuid=launch_uuid)
@@ -93,7 +94,7 @@ class Launcher:
         _uuid = uuid or self.uuid
         if not _uuid:
             raise RuntimeError("Launch UUID is not set.")
-        return self.auth.request.get_info(url_parts=self.__launch_url_parts, uuid=_uuid)
+        return self.rp_client.request.get_info(url_parts=self.__launch_url_parts, uuid=_uuid)
 
     def get_launch_id_by_uuid(self, uuid: str = None) -> int:
         self.__id = self.get_launch_info(uuid=uuid)
@@ -103,38 +104,8 @@ class Launcher:
         uuids = self.get_uuids_by_name(launch_name=launch_name)
         return uuids[-1] if uuids else None
 
-    def get_uuids_by_name(
-        self,
-        launch_name: str,
-        status: str = None,
-        page: int = None,
-        page_size: int = None
-        ) -> list[str]:
-        launches = self.get_launches_by_name(launch_name=launch_name, status=status, page=page, page_size=page_size)
-        return [launch.get('uuid') for launch in launches]
-
-
-    def get_launches_by_name(
-            self,
-            launch_name: str,
-            status: str = None,
-            page: int = None,
-            page_size: int = None
-    ) -> list[dict]:
-        params = {
-            "filter.eq.name": launch_name,
-        }
-
-        if status is not None:
-            params["filter.eq.status"] = status
-
-        if page is not None:
-            params["page.page"] = page
-
-        if page_size is not None:
-            params["page.size"] = page_size
-
-        return self.auth.request.get(self.__launch_url_parts, params=params).get("content", [])
+    def get_uuids_by_name(self, launch_name: str, status: str = None) -> list[str]:
+        return [launch.get('uuid') for launch in self.get_launches(filter_by_name=launch_name, status=status)]
 
     def finish(
         self,

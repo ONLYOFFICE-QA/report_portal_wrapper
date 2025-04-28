@@ -36,7 +36,9 @@ class ReportPortal:
             name: str = None,
             item_type: str = None,
             filter_by_launch_id: bool = True,
-            page_size: int = 100
+            page_size: int = 100,
+            cache: bool = False,
+            ttl: int = None
     ) -> list[dict]:
         return self.client.request.get_items(
             url_parts=f"{self.project_name}/item",
@@ -44,4 +46,6 @@ class ReportPortal:
             filter_by_name=name,
             filter_by_type=item_type,
             filter_by_launch_id=self.launch.id if filter_by_launch_id else None,
+            cache=cache,
+            ttl=ttl
         )

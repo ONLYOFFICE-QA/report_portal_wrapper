@@ -54,7 +54,7 @@ class TestItem:
             raise RuntimeError(f"Failed to start item '{name}': {e}")
 
     def get_info(self, uuid: str = None):
-        return self.launcher.auth.request.get_info(url_parts=self.url_parts, uuid=uuid or self.item_uuid)
+        return self.launcher.client.request.get_info(url_parts=self.url_parts, uuid=uuid or self.item_uuid)
 
     def finish(
             self,
@@ -136,14 +136,14 @@ class TestItem:
             raise RuntimeError(f"Failed to send log message to ReportPortal: {str(e)}")
 
     def get_items(self, page_size: int = 100) -> list[dict]:
-        return self.launcher.auth.request.get_items(
+        return self.launcher.client.request.get_items(
             self.url_parts,
             filter_by_launch_id=self.launcher.id,
             page_size=page_size
         )
 
     def get_items_by_type(self, page_size: int = 100):
-        return self.launcher.auth.request.get_items(
+        return self.launcher.client.request.get_items(
             self.url_parts,
             filter_by_launch_id=self.launcher.id,
             filter_by_type=self.item_type,
