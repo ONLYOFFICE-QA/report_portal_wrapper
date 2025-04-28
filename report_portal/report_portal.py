@@ -16,6 +16,7 @@ class ReportPortal:
         self.client = Client(config_path=config_path)
         self.__launcher = Launcher(project_name=project_name, client=self.client)
 
+
     @property
     def launch(self) -> Launcher:
         return self.__launcher
@@ -66,6 +67,19 @@ class ReportPortal:
             cache=cache,
             ttl=ttl,
             **kwargs
+        )
+
+    def get_test_item_info(
+            self,
+            uuid:str,
+            cache: bool = True,
+            ttl: int = None
+    ):
+        self.client.request.get_info(
+            url_parts=f"{self.project_name}/item",
+            uuid=uuid,
+            cache=cache,
+            ttl=ttl
         )
 
     def get_items(
