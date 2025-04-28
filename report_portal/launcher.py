@@ -21,15 +21,6 @@ class Launcher:
         self.url_parts = f"{self.project_name}/launch"
         self.create_client()
 
-    def get_launches(self, filter_by_name: str = None, status: str = None, page_size: int = 100) -> list[dict]:
-        return self.rp_request.get_items(
-            self.url_parts,
-            page_size=page_size,
-            filter_by_name=filter_by_name,
-            filter_by_status=status,
-            sort="start_time,desc"
-        )
-
     @property
     def id(self) -> int:
         if not self.__id:
@@ -90,23 +81,6 @@ class Launcher:
 
         except Exception as e:
             raise RuntimeError(f"Failed to start launch '{name}': {e}")
-
-    def get_launch_info(self, uuid: str = None):
-        _uuid = uuid or self.uuid
-        if not _uuid:
-            raise RuntimeError("Launch UUID is not set.")
-        return self.rp_request.get_info(url_parts=self.__launch_url_parts, uuid=_uuid)
-
-    def get_launch_id_by_uuid(self, uuid: str = None) -> int:
-        self.__id = self.get_launch_info(uuid=uuid)
-        return self.__id.get('id') if self.__id else None
-
-    def get_last_launch_uuid(self, launch_name: str) -> Optional[str]:
-        uuids = self.get_uuids_by_name(launch_name=launch_name)
-        return uuids[-1] if uuids else None
-
-    def get_uuids_by_name(self, launch_name: str, status: str = None) -> list[str]:
-        return [launch.get('uuid') for launch in self.get_launches(filter_by_name=launch_name, status=status)]
 
     def finish(
         self,
@@ -171,3 +145,42 @@ class Launcher:
         except Exception as e:
             raise RuntimeError(f"Failed to send log to ReportPortal: {e}")
 
+    def get_info(self, uuid: str = None, cache: bool = True, ttl: int = None):
+        _uuid = uuid or self.uuid
+        if not _uuid:
+            raise RuntimeError("Launch UUID is not set.")
+        return self.rp_request.get_info(url_parts=self.__launch_url_parts, uuid=_uuid, cache=cache, ttl=ttl)
+
+    def get_launch_id_by_uuid(self, uuid: str = None, cache: bool = True, ttl: int = None) -> int:
+        self.__id = self.get_info(uuid=uuid, cache=cache, ttl=ttl)
+        return self.__id.get('id') if self.__id else None
+
+    def get_last_launch_uuid(self, launch_name: str, cache: bool = True, ttl: int = None) -> Optional[str]:
+        uuids = self.get_uuids_by_name(launch_name=launch_name, cache=cache, ttl=ttl)
+        uuids.sort(key=lambda x: x.get('start_time'), reverse=True)
+        return uuids[-1] if uuids else None
+
+    def get_uuids_by_name(self, launch_name: str, status: str = None, cache: bool = False, ttl: int = None) -> list[str]:
+        launches = self.get_launches(filter_by_name=launch_name, status=status, cache=cache, ttl=ttl)
+        return [launch.get('uuid') for launch in launches]
+
+    def get_launches(
+            self,
+            filter_by_name: str = None,
+            status: str = None,
+            page_size: int = 100,
+            cache: bool = False,
+            ttl: int = None,
+            sort: str = "start_time,desc",
+            **kwargs: Any
+    ) -> list[dict]:
+        return self.rp_request.get_items(
+            self.url_parts,
+            page_size=page_size,
+            filter_by_name=filter_by_name,
+            filter_by_status=status,
+            sort=sort,
+            cache=cache,
+            ttl=ttl,
+            **kwargs
+        )
