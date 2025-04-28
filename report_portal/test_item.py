@@ -19,7 +19,7 @@ class TestItem:
     @property
     def id(self):
         if self.__item_id is None:
-            self.__item_id = self.get_info(uuid=self.uuid).get('id')
+            self.__item_id = self.get_id(uuid=self.uuid)
         return self.__item_id
 
     @property
@@ -149,6 +149,14 @@ class TestItem:
         return self.launcher.rp_request.get_info(
             url_parts=self.url_parts,
             uuid=uuid or self.uuid,
+            cache=cache,
+            ttl=ttl
+        )
+
+    def get_id(self, uuid: str, cache: bool = True, ttl: int = None):
+        return self.launcher.rp_request.get_id(
+            url_parts=self.url_parts,
+            uuid=uuid,
             cache=cache,
             ttl=ttl
         )

@@ -52,6 +52,10 @@ class ReportPortalRequests:
     def get_info(self, url_parts: str, uuid: str, cache: bool = True, ttl: int = None) -> dict | None:
         return self.get(f"{url_parts}/uuid/{uuid}", cache=cache, ttl=ttl)
 
+    @cacheable()
+    def get_id(self, url_parts: str, uuid: str, cache: bool = True, ttl: int = None) -> str | None:
+        return self.get_info(url_parts=url_parts, uuid=uuid, cache=cache, ttl=ttl).get('id')
+
     def get_items(
             self,
             url_parts: str,
