@@ -53,7 +53,8 @@ class ReportPortalRequests:
         return self.get(f"{url_parts}/uuid/{uuid}", cache=cache, ttl=ttl)
 
     def get_id(self, url_parts: str, uuid: str, cache: bool = True, ttl: int = None) -> str | None:
-        return self.get_info(url_parts=url_parts, uuid=uuid, cache=cache, ttl=ttl).get('id')
+        info = self.get_info(url_parts=url_parts, uuid=uuid, cache=cache, ttl=ttl)
+        return info.get('id') if info else None
 
     def get_items(
             self,

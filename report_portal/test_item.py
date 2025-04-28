@@ -14,12 +14,12 @@ class TestItem:
         self.launcher = launcher
         self.__item_uuid = None
         self.__item_id = None
-        self.url_parts = f"{self.launcher.project_name}/item"
+        self.info = launcher.info.test_item
 
     @property
     def id(self):
         if self.__item_id is None:
-            self.__item_id = self.get_id(uuid=self.uuid)
+            self.__item_id = self.info.get_id(uuid=self.uuid)
         return self.__item_id
 
     @property
@@ -144,38 +144,3 @@ class TestItem:
 
         except Exception as e:
             raise RuntimeError(f"Failed to send log message to ReportPortal: {str(e)}")
-
-    def get_info(self, uuid: str = None, cache: bool = True, ttl: int = None):
-        return self.launcher.rp_request.get_info(
-            url_parts=self.url_parts,
-            uuid=uuid or self.uuid,
-            cache=cache,
-            ttl=ttl
-        )
-
-    def get_id(self, uuid: str, cache: bool = True, ttl: int = None):
-        return self.launcher.rp_request.get_id(
-            url_parts=self.url_parts,
-            uuid=uuid,
-            cache=cache,
-            ttl=ttl
-        )
-
-    def get_items(self, page_size: int = 100, cache: bool = False, ttl: int = None) -> list[dict]:
-        return self.launcher.rp_request.get_items(
-            self.url_parts,
-            filter_by_launch_id=self.launcher.id,
-            page_size=page_size,
-            cache=cache,
-            ttl=ttl
-        )
-
-    def get_items_by_type(self, page_size: int = 100, cache: bool = False, ttl: int = None):
-        return self.launcher.rp_request.get_items(
-            self.url_parts,
-            filter_by_launch_id=self.launcher.id,
-            filter_by_type=self.item_type,
-            page_size=page_size,
-            cache=cache,
-            ttl=ttl
-        )
