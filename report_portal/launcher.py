@@ -27,7 +27,7 @@ class Launcher:
     @property
     def id(self) -> int:
         if not self.__id:
-            self.__id = self.info.get_launch_id_by_uuid()
+            self.__id = self.info.get_launch_id_by_uuid(uuid=self.uuid)
         return self.__id
 
     @property
