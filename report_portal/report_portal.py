@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from typing import Any
+
 from .client import Client
 from .launcher import Launcher
 
@@ -29,6 +31,42 @@ class ReportPortal:
 
     def get_launches(self, filter_by_name: str = None, page_size: int = 100) -> list[dict]:
         return self.launch.get_launches(filter_by_name=filter_by_name, page_size=page_size)
+
+    def get_suites(
+            self,
+            launch_id: str = None,
+            page_size: int = 100,
+            cache: bool = False,
+            ttl: int = None,
+            **kwargs: Any
+    ) -> list[dict]:
+        return self.client.request.get_items(
+            url_parts=f"{self.project_name}/item",
+            filter_by_type="SUITE",
+            filter_by_launch_id=launch_id or self.launch.id,
+            page_size=page_size,
+            cache=cache,
+            ttl=ttl,
+            **kwargs
+        )
+
+    def get_tests(
+            self,
+            launch_id: str = None,
+            page_size: int = 100,
+            cache: bool = False,
+            ttl: int = None,
+            **kwargs: Any
+    ) -> list[dict]:
+        return self.client.request.get_items(
+            url_parts=f"{self.project_name}/item",
+            filter_by_type="TEST",
+            filter_by_launch_id=launch_id or self.launch.id,
+            page_size=page_size,
+            cache=cache,
+            ttl=ttl,
+            **kwargs
+        )
 
     def get_items(
             self,
