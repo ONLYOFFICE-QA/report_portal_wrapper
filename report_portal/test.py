@@ -13,9 +13,9 @@ class Test:
 
     @property
     def uuid(self):
-        if not self.test_item.item_uuid:
+        if not self.test_item.__item_uuid:
             raise RuntimeError("Test item has not been started. Cannot finish the test.")
-        return self.test_item.item_uuid
+        return self.test_item.__item_uuid
 
     def update(
             self,

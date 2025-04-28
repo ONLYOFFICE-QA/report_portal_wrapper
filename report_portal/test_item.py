@@ -12,8 +12,21 @@ class TestItem:
     def __init__(self, launcher: Launcher, item_type: str = "TEST"):
         self.item_type = item_type.upper()
         self.launcher = launcher
-        self.item_uuid = None
+        self.__item_uuid = None
+        self.__item_id = None
         self.url_parts = f"{self.launcher.project_name}/item"
+
+    @property
+    def id(self):
+        if self.__item_id is None:
+            self.__item_id = self.get_info(uuid=self.uuid).get('id')
+        return self.__item_id
+
+    @property
+    def uuid(self):
+        if not self.__item_uuid:
+            raise RuntimeError(f"{self.item_type.lower()} item has not been started. Cannot finish the suite.")
+        return self.__item_uuid
 
     def start(
             self,
@@ -47,14 +60,14 @@ class TestItem:
                 uuid=uuid,
                 **kwargs
             )
-            self.item_uuid = _item_uuid
+            self.__item_uuid = _item_uuid
             return _item_uuid
 
         except Exception as e:
             raise RuntimeError(f"Failed to start item '{name}': {e}")
 
     def get_info(self, uuid: str = None):
-        return self.launcher.client.request.get_info(url_parts=self.url_parts, uuid=uuid or self.item_uuid)
+        return self.launcher.rp_request.get_info(url_parts=self.url_parts, uuid=uuid or self.__item_uuid)
 
     def finish(
             self,
@@ -70,7 +83,7 @@ class TestItem:
             **kwargs: Any
     ):
         status = status or ("PASSED" if return_code == 0 else "FAILED")
-        item_id = item_id or self.item_uuid
+        item_id = item_id or self.uuid
 
         if not item_id:
             raise RuntimeError("Test item has not been started. Cannot finish the test.")
@@ -117,7 +130,7 @@ class TestItem:
         if isinstance(level, str) and level not in valid_levels:
             raise ValueError(f"Invalid log level: {level}. Must be one of {valid_levels}.")
 
-        item_id = item_id or self.item_uuid
+        item_id = item_id or self.uuid
 
         if not item_id:
             raise RuntimeError("Cannot send log: No active test item. Start a test first.")
@@ -136,14 +149,14 @@ class TestItem:
             raise RuntimeError(f"Failed to send log message to ReportPortal: {str(e)}")
 
     def get_items(self, page_size: int = 100) -> list[dict]:
-        return self.launcher.client.request.get_items(
+        return self.launcher.rp_request.get_items(
             self.url_parts,
             filter_by_launch_id=self.launcher.id,
             page_size=page_size
         )
 
     def get_items_by_type(self, page_size: int = 100):
-        return self.launcher.client.request.get_items(
+        return self.launcher.rp_request.get_items(
             self.url_parts,
             filter_by_launch_id=self.launcher.id,
             filter_by_type=self.item_type,

@@ -11,7 +11,8 @@ class Launcher:
 
     def __init__(self, project_name: str, client: Client):
         self.project_name = project_name
-        self.rp_client = client
+        self.__client = client
+        self.rp_request = self.__client.request
         self.__RPClient = None
         self.__id = None
         self.__uuid = None
@@ -21,7 +22,7 @@ class Launcher:
         self.create_client()
 
     def get_launches(self, filter_by_name: str = None, status: str = None, page_size: int = 100) -> list[dict]:
-        return self.rp_client.request.get_items(
+        return self.rp_request.get_items(
             self.url_parts,
             page_size=page_size,
             filter_by_name=filter_by_name,
@@ -50,7 +51,7 @@ class Launcher:
         return self.__RPClient
 
     def create_client(self, launch_uuid: str = None) -> None:
-        self.__RPClient = self.rp_client.create_rpclient(project_name=self.project_name, launch_uuid=launch_uuid)
+        self.__RPClient = self.__client.create_rpclient(project_name=self.project_name, launch_uuid=launch_uuid)
 
     def connect(self, launch_uuid: str):
         self.create_client(launch_uuid=launch_uuid)
@@ -94,7 +95,7 @@ class Launcher:
         _uuid = uuid or self.uuid
         if not _uuid:
             raise RuntimeError("Launch UUID is not set.")
-        return self.rp_client.request.get_info(url_parts=self.__launch_url_parts, uuid=_uuid)
+        return self.rp_request.get_info(url_parts=self.__launch_url_parts, uuid=_uuid)
 
     def get_launch_id_by_uuid(self, uuid: str = None) -> int:
         self.__id = self.get_launch_info(uuid=uuid)
