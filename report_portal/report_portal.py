@@ -24,7 +24,7 @@ class ReportPortal:
     def get_launch_suite(self) -> Suite:
         return Suite(self.__launcher)
 
-    def test_item(self, item_type: str = "TEST") -> TestItem:
+    def get_launch_test_item(self, item_type: str = "TEST") -> TestItem:
         return TestItem(self.__launcher, item_type=item_type)
 
     def get_launches(self, filter_by_name: str = None, page_size: int = 100) -> list[dict]:
