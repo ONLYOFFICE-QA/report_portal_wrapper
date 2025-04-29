@@ -13,7 +13,6 @@ class Launcher:
         self.client = client
         self.rp_request = client.rp_request
         self.launch_request = self.rp_request.launch
-        self.rp_request = self.client.request
         self.__RPClient = None
         self.__id = None
         self.__uuid = None
@@ -43,7 +42,7 @@ class Launcher:
         return self.__RPClient
 
     def create_client(self, launch_uuid: str = None) -> None:
-        self.__RPClient = self.client.create_rpclient(project_name=self.project_name, launch_uuid=launch_uuid)
+        self.__RPClient = self.client.create_rpclient(launch_uuid=launch_uuid)
 
     def connect(self, launch_uuid: str):
         self.create_client(launch_uuid=launch_uuid)

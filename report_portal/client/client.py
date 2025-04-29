@@ -6,7 +6,7 @@ from typing import Dict, Any
 from reportportal_client import RPClient
 
 from .config import Config
-from .report_portal_requests import ReportPortalRequests
+from .rp_requests.report_portal_requests import ReportPortalRequests
 from .rp_requests import RpRequests, UrlParts
 
 
@@ -16,8 +16,7 @@ class Client:
         self.project_name = project_name
         self.config = Config()
         self.url_parts = UrlParts(project_name=self.project_name)
-        self.request = ReportPortalRequests(config=self.config)
-        self.rp_request = RpRequests(rp_requests=self.request, url_parts=self.url_parts)
+        self.rp_request = RpRequests(config=self.config, url_parts=self.url_parts)
         self.rp_client = None
         self.create_rpclient()
 

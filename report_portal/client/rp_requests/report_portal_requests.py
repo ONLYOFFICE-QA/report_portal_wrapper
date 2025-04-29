@@ -2,8 +2,8 @@
 import time
 import requests
 
-from .config import Config
-from ..utils import singleton, cacheable
+from ..config import Config
+from ...utils import singleton, cacheable
 
 
 @singleton

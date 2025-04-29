@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .url_parts import UrlParts
-from report_portal.client import ReportPortalRequests
+from .report_portal_requests import ReportPortalRequests
 
 
 class TestItemInfo:
