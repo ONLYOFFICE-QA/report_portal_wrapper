@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from report_portal.client import ReportPortalRequests
-from report_portal.info.test_item import TestItemInfo
-from report_portal.info.url_parts import UrlParts
+from report_portal.client.info.test_item import TestItemInfo
+from report_portal.client.info.url_parts import UrlParts
 
 
 class SuiteInfo(TestItemInfo):
@@ -10,7 +10,7 @@ class SuiteInfo(TestItemInfo):
         super().__init__(rp_requests=rp_requests, url_parts=url_parts, item_type="SUITE")
 
     def get_suites(self, launch_id: str, page_size: int = 100, cache: bool = False, ttl: int = None) -> list[dict]:
-        return self.rp_request.get_items(
+        return self.request.get_items(
             self.url_parts,
             filter_by_launch_id=launch_id,
             filter_by_type=self.item_type,

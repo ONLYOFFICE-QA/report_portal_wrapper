@@ -5,17 +5,15 @@ from .client import Client
 from reportportal_client.helpers import timestamp
 from typing import  Any, Optional, Union
 
-from .info import Info
-
 
 class Launcher:
 
-    def __init__(self, project_name: str, client: Client, info: Info):
-        self.info_client = info
-        self.info = info.launch
+    def __init__(self, project_name: str, client: Client):
         self.project_name = project_name
-        self.__client = client
-        self.rp_request = self.__client.request
+        self.client = client
+        self.rp_request = client.rp_request
+        self.launch_request = self.rp_request.launch
+        self.rp_request = self.client.request
         self.__RPClient = None
         self.__id = None
         self.__uuid = None
@@ -27,7 +25,7 @@ class Launcher:
     @property
     def id(self) -> int:
         if not self.__id:
-            self.__id = self.info.get_launch_id_by_uuid(uuid=self.uuid)
+            self.__id = self.launch_request.get_launch_id_by_uuid(uuid=self.uuid)
         return self.__id
 
     @property
@@ -38,14 +36,14 @@ class Launcher:
         return self.__uuid
 
     @property
-    def client(self) -> RPClient:
+    def rp_client(self) -> RPClient:
         if not self.__RPClient:
             raise RuntimeError("Client is not initialized.")
 
         return self.__RPClient
 
     def create_client(self, launch_uuid: str = None) -> None:
-        self.__RPClient = self.__client.create_rpclient(project_name=self.project_name, launch_uuid=launch_uuid)
+        self.__RPClient = self.client.create_rpclient(project_name=self.project_name, launch_uuid=launch_uuid)
 
     def connect(self, launch_uuid: str):
         self.create_client(launch_uuid=launch_uuid)
@@ -66,11 +64,11 @@ class Launcher:
         attributes = attributes or {}
 
         if not self.__launch_connected:
-            uuid = self.info.get_last_launch_uuid(by_name=name) if last_launch_connect else None
+            uuid = self.launch_request.get_last_launch_uuid(by_name=name) if last_launch_connect else None
             self.create_client(launch_uuid=uuid)
 
         try:
-            _uuid = self.client.start_launch(
+            _uuid = self.rp_client.start_launch(
                 name=name,
                 start_time=start_time,
                 description=description,
@@ -99,20 +97,20 @@ class Launcher:
         attributes = attributes or {}
 
         try:
-            self.client.finish_launch(
+            self.rp_client.finish_launch(
                 end_time=end_time,
                 status=status,
                 attributes=attributes,
                 **kwargs  
             )
-            self.client.terminate()
+            self.rp_client.terminate()
             self.__id = None
             self.__uuid = None
             self.__launch_connected = False
         except Exception as e:
             raise RuntimeError(f"Failed to finish launch '{self.id}': {e}")
 
-        self.client.terminate()
+        self.rp_client.terminate()
 
     def send_log(
             self, 
@@ -137,7 +135,7 @@ class Launcher:
         time = time or timestamp()  
 
         try:
-            self.client.log(
+            self.rp_client.log(
                 time=time,
                 message=message,
                 level=level,

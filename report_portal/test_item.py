@@ -14,7 +14,7 @@ class TestItem:
         self.launcher = launcher
         self.__item_uuid = None
         self.__item_id = None
-        self.info =launcher.info_client.test_item
+        self.info =launcher.rp_request.test_item
 
     @property
     def id(self):
@@ -44,7 +44,7 @@ class TestItem:
             **kwargs: Any
     ) -> str:
         try:
-            _item_uuid = self.launcher.client.start_test_item(
+            _item_uuid = self.launcher.rp_client.start_test_item(
                 name=name,
                 start_time=timestamp(),
                 item_type=self.item_type,
@@ -86,7 +86,7 @@ class TestItem:
             raise RuntimeError("Test item has not been started. Cannot finish the test.")
 
         try:
-            self.launcher.client.finish_test_item(
+            self.launcher.rp_client.finish_test_item(
                 item_id=item_id,
                 end_time=timestamp(),
                 status=status,
@@ -108,7 +108,7 @@ class TestItem:
             attributes: Optional[Union[list, dict]] = None,
             description: Optional[str] = None
     ) -> Optional[str]:
-        self.launcher.client.update_test_item(
+        self.launcher.rp_client.update_test_item(
             item_uuid=item_uuid,
             attributes=attributes,
             description=description
@@ -133,7 +133,7 @@ class TestItem:
             raise RuntimeError("Cannot send log: No active test item. Start a test first.")
 
         try:
-            return self.launcher.client.log(
+            return self.launcher.rp_client.log(
                 time=timestamp(),
                 message=message,
                 level=level,

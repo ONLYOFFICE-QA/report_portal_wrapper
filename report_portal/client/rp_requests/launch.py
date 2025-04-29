@@ -3,7 +3,7 @@ from typing import Optional, Any
 
 from .test_item import TestItemInfo
 from .url_parts import UrlParts
-from ..client import ReportPortalRequests
+from report_portal.client import ReportPortalRequests
 
 
 class LaunchInfo(TestItemInfo):
@@ -37,7 +37,7 @@ class LaunchInfo(TestItemInfo):
             sort: str = "start_time,desc",
             **kwargs: Any
     ) -> list[dict]:
-        return self.rp_request.get_items(
+        return self.request.get_items(
             self.url_parts,
             page_size=page_size,
             filter_by_name=by_name,

@@ -7,27 +7,31 @@ from reportportal_client import RPClient
 
 from .config import Config
 from .report_portal_requests import ReportPortalRequests
+from .rp_requests import RpRequests, UrlParts
 
 
 class Client:
-    def __init__(self, config_path: str = None):
+    def __init__(self, project_name: str, config_path: str = None):
         self.config_path = config_path or join(expanduser('~'), ".report_portal", "config.json")
+        self.project_name = project_name
         self.config = Config()
+        self.url_parts = UrlParts(project_name=self.project_name)
         self.request = ReportPortalRequests(config=self.config)
-        self.client = None
+        self.rp_request = RpRequests(rp_requests=self.request, url_parts=self.url_parts)
+        self.rp_client = None
+        self.create_rpclient()
 
-    def create_rpclient(self, project_name: str, launch_uuid: str | None = None):
+    def create_rpclient(self, launch_uuid: str | None = None):
         """
         Creates an instance of RPClient with merged configuration.
         """
-        self.client = RPClient(
+        self.rp_client = RPClient(
             endpoint=self.config.endpoint,
-            project=project_name,
+            project=self.project_name,
             api_key=self.config.api_key,
             launch_uuid=launch_uuid,
         )
-
-        return self.client
+        return self.rp_client
 
     def _load_config(self) -> Dict[str, Any]:
         """

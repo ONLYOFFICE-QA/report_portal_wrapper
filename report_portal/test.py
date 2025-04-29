@@ -7,4 +7,4 @@ class Test(TestItem):
 
     def __init__(self, launcher: Launcher):
         super().__init__(launcher=launcher, item_type="TEST")
-        self.info = launcher.info_client.test
+        self.info = launcher.rp_request.test

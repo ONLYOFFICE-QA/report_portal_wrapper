@@ -7,7 +7,7 @@ class Suite(TestItem):
 
     def __init__(self, launcher: Launcher):
         super().__init__(launcher=launcher, item_type="SUITE")
-        self.info = launcher.info_client.suite
+        self.info = launcher.rp_request.suite
 
 
     def create(self, name: str, parent_item_id: str = None, **kwargs) -> str:
