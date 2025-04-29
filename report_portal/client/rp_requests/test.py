@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from .test_item import TestItemInfo
+from .test_item import TestItem
 from .url_parts import UrlParts
 from .report_portal_requests import ReportPortalRequests
 
 
-class TestInfo(TestItemInfo):
+class Test(TestItem):
 
     def __init__(self, rp_requests: ReportPortalRequests, url_parts: UrlParts):
         super().__init__(rp_requests=rp_requests, url_parts=url_parts, item_type="TEST")

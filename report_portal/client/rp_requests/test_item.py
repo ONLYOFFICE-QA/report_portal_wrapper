@@ -3,7 +3,7 @@ from .url_parts import UrlParts
 from .report_portal_requests import ReportPortalRequests
 
 
-class TestItemInfo:
+class TestItem:
 
     def __init__(self, rp_requests: ReportPortalRequests, url_parts: UrlParts, item_type: str = "TEST"):
         self.request = rp_requests

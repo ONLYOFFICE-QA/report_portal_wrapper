@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from .report_portal_requests import ReportPortalRequests
-from .test_item import TestItemInfo
+from .test_item import TestItem
 from .url_parts import UrlParts
 
 
-class SuiteInfo(TestItemInfo):
+class Suite(TestItem):
 
     def __init__(self, rp_requests: ReportPortalRequests, url_parts: UrlParts):
         super().__init__(rp_requests=rp_requests, url_parts=url_parts, item_type="SUITE")

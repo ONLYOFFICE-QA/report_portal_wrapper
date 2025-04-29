@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from .launch import LaunchInfo
+from .launch import Launch
 from .report_portal_requests import ReportPortalRequests
-from .suite import SuiteInfo
-from .test import TestInfo
-from .test_item import TestItemInfo
+from .suite import Suite
+from .test import Test
+from .test_item import TestItem
 from .url_parts import UrlParts
 from ..config import Config
 
@@ -14,7 +14,7 @@ class RpRequests:
         self.__url_parts = url_parts
         self.config = config
         self.requests = ReportPortalRequests(config=self.config)
-        self.suite = SuiteInfo(rp_requests=self.requests, url_parts=self.__url_parts)
-        self.launch = LaunchInfo(rp_requests=self.requests, url_parts=self.__url_parts)
-        self.test = TestInfo(rp_requests=self.requests, url_parts=self.__url_parts)
-        self.test_item = TestItemInfo(rp_requests=self.requests, url_parts=self.__url_parts)
+        self.suite = Suite(rp_requests=self.requests, url_parts=self.__url_parts)
+        self.launch = Launch(rp_requests=self.requests, url_parts=self.__url_parts)
+        self.test = Test(rp_requests=self.requests, url_parts=self.__url_parts)
+        self.test_item = TestItem(rp_requests=self.requests, url_parts=self.__url_parts)
