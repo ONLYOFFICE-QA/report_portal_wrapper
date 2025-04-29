@@ -14,12 +14,12 @@ class TestItem:
         self.launcher = launcher
         self.__item_uuid = None
         self.__item_id = None
-        self.info =launcher.rp_request.test_item
+        self.request = launcher.rp_request.test_item
 
     @property
     def id(self):
         if self.__item_id is None:
-            self.__item_id = self.info.get_id(uuid=self.uuid)
+            self.__item_id = self.request.get_id(uuid=self.uuid)
         return self.__item_id
 
     @property

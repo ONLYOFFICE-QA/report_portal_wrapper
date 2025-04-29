@@ -12,7 +12,7 @@ class Launcher:
         self.project_name = project_name
         self.client = client
         self.rp_request = client.rp_request
-        self.launch_request = self.rp_request.launch
+        self.request = self.rp_request.launch
         self.__RPClient = None
         self.__id = None
         self.__uuid = None
@@ -24,7 +24,7 @@ class Launcher:
     @property
     def id(self) -> int:
         if not self.__id:
-            self.__id = self.launch_request.get_launch_id_by_uuid(uuid=self.uuid)
+            self.__id = self.request.get_launch_id_by_uuid(uuid=self.uuid)
         return self.__id
 
     @property
@@ -63,7 +63,7 @@ class Launcher:
         attributes = attributes or {}
 
         if not self.__launch_connected:
-            uuid = self.launch_request.get_last_launch_uuid(by_name=name) if last_launch_connect else None
+            uuid = self.request.get_last_launch_uuid(by_name=name) if last_launch_connect else None
             self.create_client(launch_uuid=uuid)
 
         try:
