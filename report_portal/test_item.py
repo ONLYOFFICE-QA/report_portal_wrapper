@@ -14,7 +14,7 @@ class TestItem:
         self.launcher = launcher
         self.__item_uuid = None
         self.__item_id = None
-        self.request = launcher.rp_request.test_item
+        self.request = launcher.client.rp_request.test_item
 
     @property
     def id(self):

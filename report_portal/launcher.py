@@ -11,8 +11,7 @@ class Launcher:
     def __init__(self, project_name: str, client: Client):
         self.project_name = project_name
         self.client = client
-        self.rp_request = client.rp_request
-        self.request = self.rp_request.launch
+        self.request = self.client.rp_request.launch
         self.__RPClient = None
         self.__id = None
         self.__uuid = None

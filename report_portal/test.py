@@ -7,4 +7,4 @@ class Test(TestItem):
 
     def __init__(self, launcher: Launcher):
         super().__init__(launcher=launcher, item_type="TEST")
-        self.request = launcher.rp_request.test
+        self.request = launcher.client.rp_request.test
