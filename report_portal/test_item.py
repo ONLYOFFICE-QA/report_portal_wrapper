@@ -129,6 +129,7 @@ class TestItem:
             message: str,
             item_uuid: Optional[str] = None,
             level: Union[int, str] = "INFO",
+            print_output: bool = False,
             attachment: Optional[dict] = None,
     ) -> Optional[Tuple[str, ...]]:
 
@@ -146,4 +147,5 @@ class TestItem:
                 message=message,
                 level=level,
                 item_uuid=item_uuid,
-        )
+                print_output=print_output,
+            )

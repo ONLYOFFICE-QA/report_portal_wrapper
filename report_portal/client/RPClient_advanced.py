@@ -78,7 +78,12 @@ class RPClientAdvanced(RPClient):
             level: str = "INFO",
             item_uuid: str = None,
             time: str = None,
+            print_output: bool = False,
     ):
+
+        if print_output:
+            print(f"[{level}] {message}")
+
         return self.requests.log(
             url_parts=self.url_parts.log,
             launch_uuid=launch_uuid,
