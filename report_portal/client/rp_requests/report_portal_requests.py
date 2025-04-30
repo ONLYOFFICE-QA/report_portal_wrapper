@@ -117,3 +117,16 @@ class ReportPortalRequests:
             raise ValueError(f"Invalid API version: {_api_version}. Must be one of ['v1', 'v2'].")
 
         return _api_version
+
+    def uri_join(*uri_parts: str) -> str:
+        """Join uri parts.
+
+        Avoiding usage of urlparse.urljoin and os.path.join
+        as it does not clearly join parts.
+        Args:
+            *uri_parts: tuple of values for join, can contain back and forward
+                        slashes (will be stripped up).
+        Returns:
+            An uri string.
+        """
+        return "/".join(str(s).strip("/").strip("\\") for s in uri_parts)

@@ -106,12 +106,22 @@ class TestItem:
         self,
             item_uuid: str,
             attributes: Optional[Union[list, dict]] = None,
-            description: Optional[str] = None
+            description: Optional[str] = None,
+            status: Optional[str] = None,
+            **kwargs: Any
     ) -> Optional[str]:
+
+        _status = status.upper() if status else None
+
+        if _status not in ["PASSED", "FAILED", "SKIPPED"]:
+            raise ValueError(f"Invalid status: {_status}. Must be one of ['PASSED', 'FAILED', 'SKIPPED'].")
+
         self.launcher.rp_client.update_test_item(
             item_uuid=item_uuid,
             attributes=attributes,
-            description=description
+            description=description,
+            status=_status,
+            **kwargs
         )
 
     def send_log(

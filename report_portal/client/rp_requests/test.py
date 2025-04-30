@@ -32,5 +32,5 @@ class Test(TestItem):
             cache: bool = False,
             ttl: int = None
     ) -> list[dict]:
-        return self.get_items(launch_id=launch_id, filter_by_name=name, page_size=page_size, cache=cache, ttl=ttl)
+        return self.get_items(filter_by_launch_id=launch_id, filter_by_name=name, page_size=page_size, cache=cache, ttl=ttl)
 

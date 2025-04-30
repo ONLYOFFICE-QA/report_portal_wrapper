@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from reportportal_client import RPClient
-
 from .client import Client
 from reportportal_client.helpers import timestamp
 from typing import  Any, Optional, Union
+
+from .client.RPClient_advanced import RPClientAdvanced
 
 
 class Launcher:
@@ -34,7 +34,7 @@ class Launcher:
         return self.__uuid
 
     @property
-    def rp_client(self) -> RPClient:
+    def rp_client(self) -> RPClientAdvanced:
         if not self.__RPClient:
             raise RuntimeError("Client is not initialized.")
 

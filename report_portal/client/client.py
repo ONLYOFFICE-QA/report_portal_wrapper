@@ -3,10 +3,8 @@ import json
 from os.path import join, expanduser
 from typing import Dict, Any
 
-from reportportal_client import RPClient
-
+from .RPClient_advanced import RPClientAdvanced
 from .config import Config
-from .rp_requests.report_portal_requests import ReportPortalRequests
 from .rp_requests import RpRequests, UrlParts
 
 
@@ -24,7 +22,7 @@ class Client:
         """
         Creates an instance of RPClient with merged configuration.
         """
-        self.rp_client = RPClient(
+        self.rp_client = RPClientAdvanced(
             endpoint=self.config.endpoint,
             project=self.project_name,
             api_key=self.config.api_key,
