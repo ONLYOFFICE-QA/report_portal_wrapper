@@ -113,7 +113,7 @@ class TestItem:
 
         _status = status.upper() if status else None
 
-        if _status not in ["PASSED", "FAILED", "SKIPPED"]:
+        if _status not in ["PASSED", "FAILED", "SKIPPED", 'IN_PROGRESS']:
             raise ValueError(f"Invalid status: {_status}. Must be one of ['PASSED', 'FAILED', 'SKIPPED'].")
 
         self.launcher.rp_client.update_test_item(
@@ -127,30 +127,23 @@ class TestItem:
     def send_log(
             self,
             message: str,
-            item_id: Optional[str] = None,
+            item_uuid: Optional[str] = None,
             level: Union[int, str] = "INFO",
             attachment: Optional[dict] = None,
-            **kwargs: Any
     ) -> Optional[Tuple[str, ...]]:
 
         valid_levels = ["INFO", "DEBUG", "WARN", "ERROR", "TRACE"]
         if isinstance(level, str) and level not in valid_levels:
             raise ValueError(f"Invalid log level: {level}. Must be one of {valid_levels}.")
 
-        item_id = item_id or self.uuid
+        item_uuid = item_uuid or self.uuid
 
-        if not item_id:
+        if not item_uuid:
             raise RuntimeError("Cannot send log: No active test item. Start a test first.")
 
-        try:
-            return self.launcher.rp_client.log(
-                time=timestamp(),
+        return self.launcher.rp_client.send_log(
+                launch_uuid=self.launcher.uuid,
                 message=message,
                 level=level,
-                attachment=attachment,
-                item_id=item_id,
-                **kwargs
-            )
-
-        except Exception as e:
-            raise RuntimeError(f"Failed to send log message to ReportPortal: {str(e)}")
+                item_uuid=item_uuid,
+        )

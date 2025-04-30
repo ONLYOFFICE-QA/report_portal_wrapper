@@ -10,3 +10,4 @@ class UrlParts:
         self.test_item: str = f"{self.project_name}/item"
         self.launch: str = f"{self.project_name}/launch"
         self.test: str = f"{self.project_name}/test"
+        self.log: str = f"{self.project_name}/log"

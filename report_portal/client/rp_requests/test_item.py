@@ -5,10 +5,11 @@ from .report_portal_requests import ReportPortalRequests
 
 class TestItem:
 
-    def __init__(self, rp_requests: ReportPortalRequests, url_parts: UrlParts, item_type: str = "TEST"):
+    def __init__(self, rp_requests: ReportPortalRequests, url_parts: UrlParts, item_type: str = "TEST", launch_id: str = None):
         self.request = rp_requests
         self.url_parts = url_parts.test_item
         self.item_type = item_type.upper()
+        self.launch_id = launch_id
 
     def get_info(self, uuid: str, cache: bool = True, ttl: int = None):
         return self.request.get_info(
@@ -26,5 +27,5 @@ class TestItem:
             ttl=ttl
         )
 
-    def get_items(self, **kwargs: any) -> list[dict]:
-        return self.request.get_items(url_parts=self.url_parts, **kwargs)
+    def get_items(self, launch_id: str = None, **kwargs: any) -> list[dict]:
+        return self.request.get_items(launch_id=launch_id or self.launch_id, url_parts=self.url_parts, **kwargs)

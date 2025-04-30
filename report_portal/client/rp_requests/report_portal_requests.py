@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
+from typing import Optional
+
 import requests
 
 from ..config import Config
@@ -48,6 +50,19 @@ class ReportPortalRequests:
 
         return None
 
+    def post(
+            self,
+            url_parts: str,
+            data: dict,
+    ) -> dict | None:
+        _url = f"{self.base_url}/{url_parts}"
+        response = self.session.request(method="POST", url=_url, json=data, headers=self.headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"|ERROR| Post request failed for {_url}\nError: {response.text}")
+            return None
+
     @cacheable()
     def get_info(self, url_parts: str, uuid: str, cache: bool = True, ttl: int = None) -> dict | None:
         return self.get(f"{url_parts}/uuid/{uuid}", cache=cache, ttl=ttl)
@@ -56,12 +71,36 @@ class ReportPortalRequests:
         info = self.get_info(url_parts=url_parts, uuid=uuid, cache=cache, ttl=ttl)
         return info.get('id') if info else None
 
+    def log(
+            self,
+            url_parts: str,
+            message: str,
+            launch_uuid: str,
+            log_time: str,
+            item_uuid: str = None,
+            level="INFO",
+    ) -> Optional[dict]:
+        base_data = {
+            "launchUuid": launch_uuid,
+            "itemUuid": item_uuid,
+            "time": log_time,
+            "message": message,
+            "level": level
+        }
+
+        addiction_param = {
+            "itemUuid": item_uuid,
+        }
+
+        base_data.update({key: value for key, value in addiction_param.items() if value is not None})
+        return self.post(url_parts=url_parts, data=base_data)
+
     def get_items(
             self,
             url_parts: str,
+            launch_id: str = None,
             filter_by_name: str = None,
             filter_by_status: str = None,
-            filter_by_launch_id: str = None,
             filter_by_type: str = None,
             page_size: int = 100,
             addition_params: dict = None,
@@ -82,7 +121,7 @@ class ReportPortalRequests:
         filters = {
             "filter.eq.name": filter_by_name,
             "filter.eq.status": filter_by_status.upper() if filter_by_status else None,
-            "filter.eq.launchId": filter_by_launch_id,
+            "filter.eq.launchId": launch_id,
             "filter.eq.type": filter_by_type.upper() if filter_by_type else None,
             "sort": sort
         }

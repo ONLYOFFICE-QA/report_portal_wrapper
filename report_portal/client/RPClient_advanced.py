@@ -3,7 +3,7 @@ from typing import Optional, Union, Any
 
 from reportportal_client import RPClient
 from reportportal_client.core.rp_requests import HttpRequest
-from reportportal_client.helpers import verify_value_length, uri_join
+from reportportal_client.helpers import verify_value_length, uri_join, timestamp
 
 from .rp_requests import UrlParts
 from .rp_requests.report_portal_requests import ReportPortalRequests
@@ -70,6 +70,23 @@ class RPClientAdvanced(RPClient):
             return None
 
         return response.message
+
+    def send_log(
+            self,
+            launch_uuid: str,
+            message: str,
+            level: str = "INFO",
+            item_uuid: str = None,
+            time: str = None,
+    ):
+        return self.requests.log(
+            url_parts=self.url_parts.log,
+            launch_uuid=launch_uuid,
+            message=message,
+            log_time=time or timestamp(),
+            item_uuid=item_uuid,
+            level=level
+        )
 
     def get_item_id_by_uuid(self, item_uuid: str) -> Optional[str]:
         """Get Test Item ID by the given Item UUID.
