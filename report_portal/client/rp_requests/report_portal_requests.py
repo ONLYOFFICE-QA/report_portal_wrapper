@@ -57,10 +57,10 @@ class ReportPortalRequests:
     ) -> dict | None:
         _url = f"{self.base_url}/{url_parts}"
         response = self.session.request(method="POST", url=_url, json=data, headers=self.headers)
-        if response.status_code == 200:
+        if response.status_code == 200 or response.status_code == 201:
             return response.json()
         else:
-            print(f"|ERROR| Post request failed for {_url}\nError: {response.text}")
+            print(f"|ERROR| Post request failed for {_url}\nError: {response.text}\nStatus code: {response.status_code}")
             return None
 
     @cacheable()
