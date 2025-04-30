@@ -117,7 +117,7 @@ class Launcher:
             attachment: Optional[dict] = None, 
             item_id: Optional[str] = None,
             time: Optional[str] = None,
-            print_output: bool = True,
+            print_output: bool = False,
             **kwargs: Any
         ):
         valid_levels = ["INFO", "DEBUG", "WARN", "ERROR", "TRACE"]
