@@ -33,6 +33,6 @@ class TestItem:
     def get_items_by_type(self, launch_id: str = None, **kwargs: any) -> list[dict]:
         return self.get_items(
             launch_id=launch_id,
-            url_parts=self.url_parts,
             filter_by_type=self.item_type,
-            **kwargs)
+            **kwargs
+        )
