@@ -1,0 +1,171 @@
+# -*- coding: utf-8 -*-
+import time
+from typing import Optional
+
+import requests
+
+from ..config import Config
+from ...utils import singleton, cacheable
+
+
+@singleton
+class ReportPortalRequests:
+
+    def __init__(self, config: Config):
+        self.session = requests.Session()
+        self.config = config
+        self.__api_key = config.api_key
+        self.__endpoint = config.endpoint
+        self.api_version = self._validate_api_version(version=self.config.api_version or "v1")
+        self.headers = self._get_headers()
+        self.base_url = self._get_base_url()
+
+    @cacheable()
+    def get(
+            self,
+            url_parts: str,
+            params: dict = None,
+            max_retries: int = 3,
+            interval: float = 0.5,
+            cache: bool = False,
+            ttl: int = None
+    ) -> dict | None:
+        f"""|INFO| Parameters {cache} and {ttl} for cacheable decorator"""
+
+        _url = f"{self.base_url}/{url_parts}"
+
+        for attempt in range(max_retries):
+            response = self.session.request(method="GET", url=_url, params=params or {}, headers=self.headers)
+
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(
+                    f"|ERROR| Attempt {attempt + 1} failed for {_url}\n"
+                    f"Status code: {response.status_code}\nError: {response.text}"
+                )
+
+                if attempt < max_retries - 1:
+                    time.sleep(interval)
+
+        return None
+
+    def post(
+            self,
+            url_parts: str,
+            data: dict,
+    ) -> dict | None:
+        _url = f"{self.base_url}/{url_parts}"
+        response = self.session.request(method="POST", url=_url, json=data, headers=self.headers)
+        if response.status_code == 200 or response.status_code == 201:
+            return response.json()
+        else:
+            print(f"|ERROR| Post request failed for {_url}\nError: {response.text}\nStatus code: {response.status_code}")
+            return None
+
+    @cacheable()
+    def get_info(self, url_parts: str, uuid: str, cache: bool = True, ttl: int = None) -> dict | None:
+        return self.get(f"{url_parts}/uuid/{uuid}", cache=cache, ttl=ttl)
+
+    def get_id(self, url_parts: str, uuid: str, cache: bool = True, ttl: int = None) -> str | None:
+        info = self.get_info(url_parts=url_parts, uuid=uuid, cache=cache, ttl=ttl)
+        return info.get('id') if info else None
+
+    def log(
+            self,
+            url_parts: str,
+            message: str,
+            launch_uuid: str,
+            log_time: str,
+            item_uuid: str = None,
+            level="INFO",
+    ) -> Optional[dict]:
+        base_data = {
+            "launchUuid": launch_uuid,
+            "itemUuid": item_uuid,
+            "time": log_time,
+            "message": message,
+            "level": level
+        }
+
+        addiction_param = {
+            "itemUuid": item_uuid,
+        }
+
+        base_data.update({key: value for key, value in addiction_param.items() if value is not None})
+        return self.post(url_parts=url_parts, data=base_data)
+
+    def get_items(
+            self,
+            url_parts: str,
+            launch_id: str = None,
+            filter_by_name: str = None,
+            filter_by_status: str = None,
+            filter_by_type: str = None,
+            page_size: int = 100,
+            addition_params: dict = None,
+            max_retries: int = 3,
+            interval: float = 0.5,
+            sort: str = None,
+            cache: bool = False,
+            ttl: int = None
+    ) -> list[dict]:
+        items = []
+        page = 1
+
+        _params = {
+            "page.size": page_size,
+            **(addition_params or {})
+        }
+
+        filters = {
+            "filter.eq.name": filter_by_name,
+            "filter.eq.status": filter_by_status.upper() if filter_by_status else None,
+            "filter.eq.launchId": launch_id,
+            "filter.eq.type": filter_by_type.upper() if filter_by_type else None,
+            "sort": sort
+        }
+
+        _params.update({key: value for key, value in filters.items() if value is not None})
+
+        while True:
+            _params["page.page"] = page
+            data = self.get(url_parts, params=_params, max_retries=max_retries, interval=interval, cache=cache, ttl=ttl)
+            page_content = data.get("content", [])
+            items.extend(page_content)
+
+            if page > data.get("page", {}).get("totalPages", 1):
+                break
+
+            page += 1
+
+        return items
+
+    def _get_base_url(self) -> str:
+        return f"{self.__endpoint}/api/{self.api_version}"
+
+    def _get_headers(self) -> dict:
+        return {
+            "Authorization": f"Bearer {self.__api_key}"
+        }
+
+    @staticmethod
+    def _validate_api_version(version: str) -> str:
+        _api_version = version.lower()
+        if _api_version not in ["v1", "v2"]:
+            raise ValueError(f"Invalid API version: {_api_version}. Must be one of ['v1', 'v2'].")
+
+        return _api_version
+
+    def uri_join(*uri_parts: str) -> str:
+        """Join uri parts.
+
+        Avoiding usage of urlparse.urljoin and os.path.join
+        as it does not clearly join parts.
+        Args:
+            *uri_parts: tuple of values for join, can contain back and forward
+                        slashes (will be stripped up).
+        Returns:
+            An uri string.
+        """
+        return "/".join(str(s).strip("/").strip("\\") for s in uri_parts)

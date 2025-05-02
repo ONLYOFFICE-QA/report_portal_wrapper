@@ -3,25 +3,54 @@ from .client import Client
 from reportportal_client.helpers import timestamp
 from typing import  Any, Optional, Union
 
+from .client.RPClient_advanced import RPClientAdvanced
+
 
 class Launcher:
 
-    def __init__(self, project_name: str, config_path: str = None):
+    def __init__(self, project_name: str, client: Client):
         self.project_name = project_name
-        self.config_path = config_path
-        self._client = None
-        self.id = None
+        self.client = client
+        self.request = self.client.rp_request.launch
+        self.__RPClient = None
+        self.__id = None
+        self.__uuid = None
+        self.__launch_url_parts = f"{self.project_name}/launch"
+        self.__launch_connected: bool = False
+        self.url_parts = f"{self.project_name}/launch"
+        self.create_client()
 
     @property
-    def client(self):
-        if not self._client:
+    def id(self) -> int:
+        if not self.__id:
+            self.__id = self.request.get_launch_id_by_uuid(uuid=self.uuid)
+        return self.__id
+
+    @property
+    def uuid(self) -> str:
+        if not self.__uuid:
+            raise RuntimeError("Launch is not initialised.")
+
+        return self.__uuid
+
+    @property
+    def rp_client(self) -> RPClientAdvanced:
+        if not self.__RPClient:
             raise RuntimeError("Client is not initialized.")
 
-        return self._client
+        return self.__RPClient
+
+    def create_client(self, launch_uuid: str = None) -> None:
+        self.__RPClient = self.client.create_rpclient(launch_uuid=launch_uuid)
+
+    def connect(self, launch_uuid: str):
+        self.create_client(launch_uuid=launch_uuid)
+        self.__launch_connected = True
 
     def start(
-        self, 
-        name: str, 
+        self,
+        name: str,
+        last_launch_connect: bool = False,
         start_time: Optional[str] = None,
         description: Optional[str] = None, 
         attributes: Optional[list | dict] = None,
@@ -29,13 +58,15 @@ class Launcher:
         rerun_of: Optional[str] = None,
         **kwargs
     ) -> str:
-        start_time = start_time or timestamp()  
+        start_time = start_time or timestamp()
         attributes = attributes or {}
 
-        self._client = Client(config_path=self.config_path).create(project_name=self.project_name)
+        if not self.__launch_connected:
+            uuid = self.request.get_last_launch_uuid(by_name=name) if last_launch_connect else None
+            self.create_client(launch_uuid=uuid)
 
         try:
-            self.id = self._client.start_launch(
+            _uuid = self.rp_client.start_launch(
                 name=name,
                 start_time=start_time,
                 description=description,
@@ -44,11 +75,11 @@ class Launcher:
                 rerun_of=rerun_of,
                 **kwargs
             )
-            return self.id
+            self.__uuid = _uuid
+            return _uuid
 
         except Exception as e:
             raise RuntimeError(f"Failed to start launch '{name}': {e}")
-
 
     def finish(
         self,
@@ -57,25 +88,27 @@ class Launcher:
         attributes: Optional[Union[list, dict]] = None,
         **kwargs: Any
     ):
-        if not self.id:
+        if not self.uuid:
             raise RuntimeError("No active launch to finish.")
 
         end_time = end_time or timestamp() 
         attributes = attributes or {}
 
         try:
-            self._client.finish_launch(
+            self.rp_client.finish_launch(
                 end_time=end_time,
                 status=status,
                 attributes=attributes,
                 **kwargs  
             )
-            self._client.terminate()
-            self.id = None
+            self.rp_client.terminate()
+            self.__id = None
+            self.__uuid = None
+            self.__launch_connected = False
         except Exception as e:
             raise RuntimeError(f"Failed to finish launch '{self.id}': {e}")
 
-        self._client.terminate()
+        self.rp_client.terminate()
 
     def send_log(
             self, 
@@ -84,7 +117,7 @@ class Launcher:
             attachment: Optional[dict] = None, 
             item_id: Optional[str] = None,
             time: Optional[str] = None,
-            print_output: bool = True,
+            print_output: bool = False,
             **kwargs: Any
         ):
         valid_levels = ["INFO", "DEBUG", "WARN", "ERROR", "TRACE"]
@@ -100,7 +133,7 @@ class Launcher:
         time = time or timestamp()  
 
         try:
-            self._client.log(
+            self.rp_client.log(
                 time=time,
                 message=message,
                 level=level,
@@ -110,4 +143,3 @@ class Launcher:
             )
         except Exception as e:
             raise RuntimeError(f"Failed to send log to ReportPortal: {e}")
-

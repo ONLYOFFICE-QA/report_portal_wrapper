@@ -3,27 +3,32 @@ import json
 from os.path import join, expanduser
 from typing import Dict, Any
 
-from reportportal_client import RPClient
+from .RPClient_advanced import RPClientAdvanced
+from .config import Config
+from .rp_requests import RpRequests, UrlParts
 
 
 class Client:
-    def __init__(self, config_path: str = None):
+    def __init__(self, project_name: str, config_path: str = None):
         self.config_path = config_path or join(expanduser('~'), ".report_portal", "config.json")
-        self.client = None
+        self.project_name = project_name
+        self.config = Config()
+        self.url_parts = UrlParts(project_name=self.project_name)
+        self.rp_request = RpRequests(config=self.config, url_parts=self.url_parts)
+        self.rp_client = None
+        self.create_rpclient()
 
-    def create(self, project_name: str, launch_uuid: str | None = None):
+    def create_rpclient(self, launch_uuid: str | None = None):
         """
         Creates an instance of RPClient with merged configuration.
         """
-        config = self._load_config()
-        self.client = RPClient(
-            endpoint=config["endpoint"],
-            project=project_name,
-            api_key=config["api_key"],
+        self.rp_client = RPClientAdvanced(
+            endpoint=self.config.endpoint,
+            project=self.project_name,
+            api_key=self.config.api_key,
             launch_uuid=launch_uuid,
         )
-
-        return self.client
+        return self.rp_client
 
     def _load_config(self) -> Dict[str, Any]:
         """
@@ -37,17 +42,3 @@ class Client:
 
         except (FileNotFoundError, json.JSONDecodeError) as e:
             raise RuntimeError(f"Failed to load config from {self.config_path}: {e}")
-
-    def get(self):
-        """
-        Retrieves the initialized ReportPortal client.
-
-        :raises RuntimeError: If the client is not initialized.
-        :return: The initialized RPClient instance.
-        """
-        if not self.client:
-            raise RuntimeError("Client is not initialized.")
-
-        return self.client
-
-
