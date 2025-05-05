@@ -7,4 +7,3 @@ class Step(TestItem):
 
     def __init__(self,  launcher: Launcher):
         super().__init__(launcher=launcher, item_type="STEP")
-        self.request = launcher.client.rp_request.step

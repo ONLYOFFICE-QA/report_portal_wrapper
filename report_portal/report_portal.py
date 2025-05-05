@@ -13,7 +13,6 @@ class ReportPortal:
     def __init__(self, project_name: str, config_path: str = None):
         self.project_name = project_name
         self.client = Client(config_path=config_path, project_name=self.project_name)
-        self.request = self.client.rp_request
         self.__launcher = Launcher(project_name=project_name, client=self.client)
 
     @property

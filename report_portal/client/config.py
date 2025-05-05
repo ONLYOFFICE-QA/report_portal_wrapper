@@ -7,7 +7,6 @@ from typing import Dict, Any
 class Config:
     default_config_path = str(Path.home() / ".report_portal" / "config.json")
 
-
     def __init__(self, config_path: str = None):
         self.config_path = config_path or self.default_config_path
         self.__config = self._load_config(self.config_path)
