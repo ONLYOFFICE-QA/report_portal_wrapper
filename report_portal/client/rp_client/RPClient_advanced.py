@@ -22,7 +22,7 @@ class RPClientAdvanced(RPClient):
             launch_uuid=launch_uuid,
             **kwargs
         )
-        self.requests = ReportPortalRequests(config=self.config)
+        self.requests = ReportPortalRequests(config=self.config, session=self.session)
         self.url_parts = UrlParts(project_name=self.project)
 
     def update_test_item(
@@ -78,7 +78,6 @@ class RPClientAdvanced(RPClient):
     ) -> Optional[dict]:
         base_data = {
             "launchUuid": launch_uuid,
-            "itemUuid": item_uuid,
             "time": time,
             "message": message,
             "level": level
