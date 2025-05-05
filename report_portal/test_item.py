@@ -163,7 +163,7 @@ class TestItem:
         )
 
     def get_id(self, uuid: str, cache: bool = True, ttl: int = None):
-        return self.launcher.rp_client.get_info(
+        return self.launcher.rp_client.get_id(
             item_type=self.item_type,
             uuid=uuid,
             cache=cache,
