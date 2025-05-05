@@ -177,9 +177,10 @@ class TestItem:
             **kwargs
         )
 
-    def get_items_by_type(self, launch_id: str = None, **kwargs: any) -> list[dict]:
+    def get_items_by_type(self, name: str = None, launch_id: str | int = None, **kwargs: any) -> list[dict]:
         return self.get_items(
             launch_id=launch_id,
+            filter_by_name=name,
             filter_by_type=self.item_type,
             **kwargs
         )

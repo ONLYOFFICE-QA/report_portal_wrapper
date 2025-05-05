@@ -152,6 +152,9 @@ class RPClientAdvanced(RPClient):
                 ttl=ttl
             )
 
+            if not data:
+                break
+
             page_content = data.get("content", [])
             items.extend(page_content)
 
@@ -172,4 +175,4 @@ class RPClientAdvanced(RPClient):
         else:
             url_parts = self.url_parts.test_item
 
-        return self.requests.uri_join(url_parts, item_type)
+        return url_parts
