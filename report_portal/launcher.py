@@ -101,39 +101,6 @@ class Launcher:
 
         self.rp_client.terminate()
 
-    def send_log(
-            self, 
-            message: str, 
-            level: Optional[Union[int, str]] = "INFO",
-            item_uuid: Optional[str] = None,
-            time: Optional[str] = None,
-            print_output: bool = False,
-            **kwargs: Any
-        ):
-
-        valid_levels = ["INFO", "DEBUG", "WARN", "ERROR", "TRACE"]
-
-        if isinstance(level, str) and level not in valid_levels:
-            raise ValueError(f"Invalid log level: {level}. Must be one of {valid_levels}.")
-
-        if print_output:
-            print(f"[{level}] {message}")
-
-        _item_uuid = item_uuid or self.uuid
-
-        if not _item_uuid:
-            raise RuntimeError("Cannot send log: No active launch. Please start a launch or connect to an existing one.")
-
-        time = time or timestamp()  
-
-        self.rp_client.send_log(
-                time=time,
-                message=message,
-                level=level,
-                item_uuid=_item_uuid,
-                **kwargs
-            )
-
     def get_launch_id_by_uuid(self, uuid: str, cache: bool = True, ttl: int = None) -> str | None:
         return self.rp_client.get_id(item_type=self.item_type, uuid=uuid, cache=cache, ttl=ttl)
 

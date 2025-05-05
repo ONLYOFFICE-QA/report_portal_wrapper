@@ -22,7 +22,7 @@ class RPClientAdvanced(RPClient):
             launch_uuid=launch_uuid,
             **kwargs
         )
-        self.requests = ReportPortalRequests(config=self.config, session=self.session)
+        self.requests = ReportPortalRequests(config=self.config)
         self.url_parts = UrlParts(project_name=self.project)
 
     def update_test_item(
