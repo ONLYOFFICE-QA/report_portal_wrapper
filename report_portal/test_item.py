@@ -14,7 +14,7 @@ class TestItem:
         self.launcher = launcher
         self.__item_uuid = None
         self.__item_id = None
-        self.request = launcher.client.rp_request.test_item
+        self.request = launcher.client.rp_client.requests
 
     @property
     def id(self):
@@ -130,6 +130,7 @@ class TestItem:
             item_uuid: Optional[str] = None,
             level: Union[int, str] = "INFO",
             print_output: bool = False,
+            time: Optional[str] = None,
             attachment: Optional[dict] = None,
     ) -> Optional[Tuple[str, ...]]:
 
@@ -142,10 +143,43 @@ class TestItem:
         if not item_uuid:
             raise RuntimeError("Cannot send log: No active test item. Start a test first.")
 
+        if print_output:
+            print(f"[{level}] {message}")
+
         return self.launcher.rp_client.send_log(
-                launch_uuid=self.launcher.uuid,
                 message=message,
+                launch_uuid=self.launcher.uuid,
+                time=time or timestamp(),
                 level=level,
-                item_uuid=item_uuid,
-                print_output=print_output,
+                item_uuid=item_uuid
             )
+
+    def get_info(self, uuid: str, cache: bool = True, ttl: int = None):
+        return self.launcher.rp_client.get_info(
+            item_type=self.item_type,
+            uuid=uuid,
+            cache=cache,
+            ttl=ttl
+        )
+
+    def get_id(self, uuid: str, cache: bool = True, ttl: int = None):
+        return self.launcher.rp_client.get_info(
+            item_type=self.item_type,
+            uuid=uuid,
+            cache=cache,
+            ttl=ttl
+        )
+
+    def get_items(self, launch_id: str = None, **kwargs: any) -> list[dict]:
+        return self.launcher.rp_client.get_items(
+            item_type=self.item_type,
+            launch_id=launch_id or self.launcher.id,
+            **kwargs
+        )
+
+    def get_items_by_type(self, launch_id: str = None, **kwargs: any) -> list[dict]:
+        return self.get_items(
+            launch_id=launch_id,
+            filter_by_type=self.item_type,
+            **kwargs
+        )

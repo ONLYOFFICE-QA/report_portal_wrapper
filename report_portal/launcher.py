@@ -1,29 +1,27 @@
 # -*- coding: utf-8 -*-
-from .client import Client
 from reportportal_client.helpers import timestamp
 from typing import  Any, Optional, Union
 
-from .client.RPClient_advanced import RPClientAdvanced
+from .client import Client
+from .client.rp_client import RPClientAdvanced
 
 
 class Launcher:
+    item_type = 'launch'
 
     def __init__(self, project_name: str, client: Client):
         self.project_name = project_name
         self.client = client
-        self.request = self.client.rp_request.launch
         self.__RPClient = None
         self.__id = None
         self.__uuid = None
-        self.__launch_url_parts = f"{self.project_name}/launch"
         self.__launch_connected: bool = False
-        self.url_parts = f"{self.project_name}/launch"
         self.create_client()
 
     @property
     def id(self) -> int:
         if not self.__id:
-            self.__id = self.request.get_launch_id_by_uuid(uuid=self.uuid)
+            self.__id = self.get_launch_id_by_uuid(uuid=self.uuid)
         return self.__id
 
     @property
@@ -62,24 +60,20 @@ class Launcher:
         attributes = attributes or {}
 
         if not self.__launch_connected:
-            uuid = self.request.get_last_launch_uuid(by_name=name) if last_launch_connect else None
+            uuid = self.get_last_launch_uuid(by_name=name) if last_launch_connect else None
             self.create_client(launch_uuid=uuid)
 
-        try:
-            _uuid = self.rp_client.start_launch(
-                name=name,
-                start_time=start_time,
-                description=description,
-                attributes=attributes,
-                rerun=rerun,
-                rerun_of=rerun_of,
-                **kwargs
-            )
-            self.__uuid = _uuid
-            return _uuid
-
-        except Exception as e:
-            raise RuntimeError(f"Failed to start launch '{name}': {e}")
+        _uuid = self.rp_client.start_launch(
+            name=name,
+            start_time=start_time,
+            description=description,
+            attributes=attributes,
+            rerun=rerun,
+            rerun_of=rerun_of,
+            **kwargs
+        )
+        self.__uuid = _uuid
+        return _uuid
 
     def finish(
         self,
@@ -94,52 +88,84 @@ class Launcher:
         end_time = end_time or timestamp() 
         attributes = attributes or {}
 
-        try:
-            self.rp_client.finish_launch(
-                end_time=end_time,
-                status=status,
-                attributes=attributes,
-                **kwargs  
-            )
-            self.rp_client.terminate()
-            self.__id = None
-            self.__uuid = None
-            self.__launch_connected = False
-        except Exception as e:
-            raise RuntimeError(f"Failed to finish launch '{self.id}': {e}")
+        self.rp_client.finish_launch(
+            end_time=end_time,
+            status=status,
+            attributes=attributes,
+            **kwargs
+        )
+        self.rp_client.terminate()
+        self.__id = None
+        self.__uuid = None
+        self.__launch_connected = False
 
         self.rp_client.terminate()
 
     def send_log(
             self, 
             message: str, 
-            level: Optional[Union[int, str]] = "INFO", 
-            attachment: Optional[dict] = None, 
-            item_id: Optional[str] = None,
+            level: Optional[Union[int, str]] = "INFO",
+            item_uuid: Optional[str] = None,
             time: Optional[str] = None,
             print_output: bool = False,
             **kwargs: Any
         ):
+
         valid_levels = ["INFO", "DEBUG", "WARN", "ERROR", "TRACE"]
+
         if isinstance(level, str) and level not in valid_levels:
             raise ValueError(f"Invalid log level: {level}. Must be one of {valid_levels}.")
 
         if print_output:
             print(f"[{level}] {message}")
 
-        if not self.id:
+        _item_uuid = item_uuid or self.uuid
+
+        if not _item_uuid:
             raise RuntimeError("Cannot send log: No active launch. Please start a launch or connect to an existing one.")
 
         time = time or timestamp()  
 
-        try:
-            self.rp_client.log(
+        self.rp_client.send_log(
                 time=time,
                 message=message,
                 level=level,
-                attachment=attachment,
-                item_id=item_id,
-                **kwargs  
+                item_uuid=_item_uuid,
+                **kwargs
             )
-        except Exception as e:
-            raise RuntimeError(f"Failed to send log to ReportPortal: {e}")
+
+    def get_launch_id_by_uuid(self, uuid: str, cache: bool = True, ttl: int = None) -> str | None:
+        return self.rp_client.get_id(item_type=self.item_type, uuid=uuid, cache=cache, ttl=ttl)
+
+    def get_last_launch_uuid(self, by_name: str = None, cache: bool = True, ttl: int = None) -> Optional[str]:
+        last_launch = self.get_last_launch(by_name=by_name, cache=cache, ttl=ttl)
+        return last_launch.get('uuid') if last_launch else None
+
+    def get_uuids_by_name(self, launch_name: str, status: str = None, cache: bool = False, ttl: int = None) -> list[str]:
+        launches = self.get_launches(by_name=launch_name, status=status, cache=cache, ttl=ttl)
+        return [launch.get('uuid') for launch in launches]
+
+    def get_last_launch(self, by_name: str = None, status: str = None, cache: bool = True, ttl: int = None):
+        launches = self.get_launches(by_name=by_name, status=status, cache=cache, ttl=ttl)
+        return launches[-1] if launches else []
+
+    def get_launches(
+            self,
+            by_name: str = None,
+            status: str = None,
+            page_size: int = 100,
+            cache: bool = False,
+            ttl: int = None,
+            sort: str = "start_time,desc",
+            **kwargs: Any
+    ) -> list[dict]:
+        return self.rp_client.get_items(
+            item_type=self.item_type,
+            page_size=page_size,
+            filter_by_name=by_name,
+            filter_by_status=status,
+            sort=sort,
+            cache=cache,
+            ttl=ttl,
+            **kwargs
+        )
