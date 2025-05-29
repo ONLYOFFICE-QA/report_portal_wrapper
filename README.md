@@ -9,7 +9,7 @@
 Ensure you have `reportportal-client` installed:
 
 ```sh
-pip install reportportal-client
+uv sync
 ```
 
 # Configuration for Report Portal client
