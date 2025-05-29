@@ -1,5 +1,3 @@
-from json.decoder import JSONObject
-
 # Report Portal Launcher
 
 ## Overview
