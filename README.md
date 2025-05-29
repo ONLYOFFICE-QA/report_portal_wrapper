@@ -1,5 +1,3 @@
-from json.decoder import JSONObject
-
 # Report Portal Launcher
 
 ## Overview
@@ -11,12 +9,8 @@ from json.decoder import JSONObject
 Ensure you have `reportportal-client` installed:
 
 ```sh
-pip install reportportal-client
+uv sync
 ```
-
-## Usage
-
-### 1. Initializing ReportPortalLauncher
 
 # Configuration for Report Portal client
 
@@ -29,12 +23,17 @@ Create a configuration file at the path `~\.report_portal\config.json` with the 
 }
 ```
 
-To start using the Report Portal client, initialize the `ReportPortalLauncher` with the required configuration:
+## Usage
+
+
+### 1. Initializing ReportPortal
+
+To start using the Report Portal client, initialize the `ReportPortal` with the required configuration:
 
 ```python
-from report_portal_launcher import ReportPortalLauncher
+from report_portal import ReportPortal
 
-launcher = ReportPortalLauncher(project_name="your_project_name")
+rp = ReportPortal(project_name="your_project_name")
 ```
 
 ### 2. Starting a Test Launch
@@ -42,42 +41,40 @@ launcher = ReportPortalLauncher(project_name="your_project_name")
 To create a new test launch:
 
 ```python
-launch_id = launcher.start_launch(name="My Test Launch")
-print(f"Launch started with ID: {launch_id}")
+launch_uuid = rp.launch.start(name="launch_name")
+print(f"Launch started with UUID: {launch_uuid}")
 ```
 
 If you need to connect to an existing launch:
 
 ```python
-launcher.connect_to_launch(launch_id="existing_launch_id")
+rp.launch.connect(launch_uuid="existing_launch_uuid")
 ```
 
-### 3. Working with Test Cases
+### 3. Working with Test Step
 
-Create a `ReportPortalTest` instance to interact with individual test cases:
+After launch start you can create a test case
 
 ```python
-from report_portal_launcher import ReportPortalTest
-
-test = ReportPortalTest(launcher.get_client())
+step = rp.get_launch_step()
 ```
 
 #### Start a Test
 
 ```python
-test.start_test(test_name="Sample Test")
+step.start(name="Sample Test")
 ```
 
 #### Send Logs
 
 ```python
-test.send_log("Test execution started", level="INFO")
+step.send_log("Test execution started", level="INFO")
 ```
 
 #### Finish a Test
 
 ```python
-test.finish_test(status="PASSED")  # Mark as PASSED
+step.finish(return_code=0, status="PASSED")  # Mark as PASSED
 ```
 
 ### 4. Finishing the Test Launch
@@ -85,34 +82,26 @@ test.finish_test(status="PASSED")  # Mark as PASSED
 Once all test cases are completed, finish the launch:
 
 ```python
-launcher.finish_launch()
+rp.launch.finish()
 ```
-
-## Error Handling
-
--   If `start_test` is called before `start_launch`, a `RuntimeError` will be raised.
--   Invalid log levels will trigger a `ValueError`.
--   If the client is not initialized, operations will raise `RuntimeError`.
 
 ## Example 
 
 ```python
-from report_portal_launcher import ReportPortalLauncher, ReportPortalTest
+from report_portal import ReportPortal
 
-# Initialize the launcher
-
-launcher = ReportPortalLauncher(project_name="your_project_name")
+# Initialize the report portal
+rp = ReportPortal(project_name="your_project_name")
 
 # Start a test launch
-launcher.start_launch(name="My Test")
+rp.launch.start(name="9.0.0.58")
 
-# Initialize a test instance
-test = ReportPortalTest(launcher.get_client())
-
-test.start_test(test_name="Sample Test")
-test.send_log("Executing test case", level="INFO")
-test.finish_test(status="PASSED")
+# Initialize a test step instance
+step = rp.get_launch_step()
+step.start(name="Sample Test")
+step.send_log("Executing test case", level="INFO")
+step.finish(return_code=0)
 
 # Finish the test launch
-launcher.finish_launch()
+rp.launch.finish()
 ```
