@@ -10,5 +10,8 @@ class Suite(TestItem):
 
     def create(self, name: str, parent_item_id: str = None, return_code: int = 0, **kwargs) -> str:
         suite_uuid = self.start(name=name, parent_item_id=parent_item_id, **kwargs)
+        if not suite_uuid:
+            print(f"|ERROR| Can't create suite: Name: {name}, Parent_item_id: {parent_item_id}")
+            raise RuntimeError
         self.finish(return_code=return_code, item_id=suite_uuid, **kwargs)
         return suite_uuid
