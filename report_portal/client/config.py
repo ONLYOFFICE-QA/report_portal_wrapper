@@ -5,6 +5,10 @@ from typing import Dict, Any
 
 
 class Config:
+    """Configuration loader for ReportPortal client.
+
+    :param config_path: Optional path to JSON config; defaults to user home.
+    """
     default_config_path = str(Path.home() / ".report_portal" / "config.json")
 
     def __init__(self, config_path: str = None):
@@ -15,9 +19,9 @@ class Config:
         self.api_version = self.__config.get('api_version', None)
 
     def _load_config(self, json_path: str) -> Dict[str, Any]:
-        """
-        Loads the configuration from the JSON file.
+        """Load the configuration from a JSON file.
 
+        :param json_path: Path to JSON config file.
         :return: Dictionary with configuration parameters.
         """
         try:
