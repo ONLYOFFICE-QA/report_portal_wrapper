@@ -9,19 +9,16 @@ from .client.rp_client import RPClientAdvanced
 class Launcher:
     """High-level API for managing ReportPortal launches.
 
-    :param project_name: ReportPortal project name.
     :param client: Configured client wrapper used to build RP client.
     """
 
     item_type = 'launch'
 
-    def __init__(self, project_name: str, client: Client):
+    def __init__(self, client: Client):
         """Initialize launcher instance.
 
-        :param project_name: ReportPortal project name.
         :param client: Configured client wrapper used to build RP client.
         """
-        self.project_name = project_name
         self.client = client
         self.__RPClient = None
         self.__id = None

@@ -56,7 +56,7 @@ rp.launch.connect(launch_uuid="existing_launch_uuid")
 After launch start you can create a test case
 
 ```python
-step = rp.get_launch_step()
+step = rp.get_step()
 ```
 
 #### Start a Test
@@ -85,7 +85,7 @@ Once all test cases are completed, finish the launch:
 rp.launch.finish()
 ```
 
-## Example 
+## Example
 
 ```python
 from report_portal import ReportPortal
@@ -97,7 +97,7 @@ rp = ReportPortal(project_name="your_project_name")
 rp.launch.start(name="9.0.0.58")
 
 # Initialize a test step instance
-step = rp.get_launch_step()
+step = rp.get_step()
 step.start(name="Sample Test")
 step.send_log("Executing test case", level="INFO")
 step.finish(return_code=0)
