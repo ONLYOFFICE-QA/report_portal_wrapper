@@ -2,16 +2,36 @@
 import time
 import requests
 
-from typing import Optional
+from typing import Any, Optional, Protocol
 
 from ..config import Config
 from ...utils import singleton, cacheable
 
 
+class HttpSession(Protocol):
+    """Minimal HTTP session interface shared by `requests.Session` and the `reportportal_client` one."""
+
+    def get(self, url: str, **kwargs: Any) -> requests.Response:
+        """Perform HTTP GET request.
+
+        :param url: Target URL
+        :param kwargs: Additional arguments passed to the underlying session
+        """
+        ...
+
+    def post(self, url: str, **kwargs: Any) -> requests.Response:
+        """Perform HTTP POST request.
+
+        :param url: Target URL
+        :param kwargs: Additional arguments passed to the underlying session
+        """
+        ...
+
+
 @singleton
 class ReportPortalRequests:
 
-    def __init__(self, config: Config, session: Optional[requests.Session] = None):
+    def __init__(self, config: Config, session: Optional[HttpSession] = None):
         self.session = session or requests.Session()
         self.config = config
         self.__api_key = config.api_key
@@ -35,7 +55,7 @@ class ReportPortalRequests:
         _url = f"{self.base_url}/{url_parts}"
 
         for attempt in range(max_retries):
-            response = self.session.request(method="GET", url=_url, params=params or {}, headers=self.headers)
+            response = self.session.get(_url, params=params or {}, headers=self.headers)
 
             if response.status_code == 200:
                 return response.json()
@@ -56,7 +76,7 @@ class ReportPortalRequests:
             data: dict,
     ) -> dict | None:
         _url = f"{self.base_url}/{url_parts}"
-        response = self.session.request(method="POST", url=_url, json=data, headers=self.headers)
+        response = self.session.post(_url, json=data, headers=self.headers)
         if response.status_code == 200 or response.status_code == 201:
             return response.json()
         else:
